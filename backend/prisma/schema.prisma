@@ -1,0 +1,73 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id             String    @id @default(uuid())
+  name           String
+  email          String    @unique
+  passwordHash   String
+  role           String
+  avatarInitials String
+  color          String
+  comments       Comment[]
+  tasks          Task[]    @relation("TaskAssignees")
+}
+
+model Workspace {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  tasks       Task[]
+}
+
+model Task {
+  id          String          @id @default(uuid())
+  workspaceId String
+  workspace   Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  status      String          // "planning" | "in_progress" | "completed"
+  priority    String          // "low" | "medium" | "high" | "urgent"
+  startDate   String
+  dueDate     String
+  address     String          // System / Ort
+  checklist   ChecklistItem[]
+  comments    Comment[]
+  assignees   User[]          @relation("TaskAssignees")
+}
+
+model ChecklistItem {
+  id        String  @id @default(uuid())
+  taskId    String
+  task      Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  text      String
+  completed Boolean @default(false)
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  text      String
+  timestamp DateTime @default(now())
+}
+
+model Ticket {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  reporter    String
+  category    String   // "Hardware" | "Software" | "Netzwerk" | "Berechtigungen"
+  priority    String   // "low" | "medium" | "high" | "urgent"
+  status      String   // "open" | "in_progress" | "resolved"
+  createdAt   DateTime @default(now())
+  slaHours    Int
+}
