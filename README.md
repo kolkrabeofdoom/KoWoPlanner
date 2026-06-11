@@ -11,7 +11,7 @@ PISHI ist ein moderner, interaktiver Prototyp für ein webbasiertes Projektmanag
 - **Interaktive SVG-Charts:** Reaktive Visualisierungen der Aufgabenverteilung (Doughnut Chart), des Team-Workloads (Bar Chart) und der Prioritäten (Column Chart) mittels CSS-Animationen.
 - **Fristen-Timeline & Notfall-Ticker:** Chronologische Sortierung der nächsten Deadlines und eine Highlight-Liste für kritische Probleme.
 
-![PISHI Dashboard](public/dashboard.png?v=2)
+![PISHI Dashboard](public/dashboard.png?v=3)
 
 ### 2. 🎛️ Projektansichten & Task-Modal
 - **Kanban-Board:** Visualisierung der Projektphasen (*In Planung, In Bearbeitung, Erledigt*) mit nativer HTML5 Drag-and-Drop Unterstützung zur einfachen Statusänderung.
@@ -20,21 +20,21 @@ PISHI ist ein moderner, interaktiver Prototyp für ein webbasiertes Projektmanag
 - **Gantt-Timeline:** Ein horizontales Gantt-Diagramm für den Projektmonat Juni 2026 zur Veranschaulichung von Aufgabenlaufzeiten und Teamzuteilungen.
 - **Detaillierter Editor:** Anpassbare Titel, Beschreibungen, Fristen, Checklisten (mit Fortschrittsbalken) sowie ein interaktiver Kommentar-Feed.
 
-![PISHI Kanban & Task Modal](public/kanban_modal.png?v=2)
+![PISHI Kanban & Task Modal](public/kanban_modal.png?v=3)
 
 ### 3. 🛟 IT-Support Helpdesk & SLA-Dashboard
 - **Fehlererfassung:** Zentrales Eingabeformular für andere Fachabteilungen zur Erfassung von IT-Problemen (Hardware, Software, Netzwerk, Berechtigungen) inklusive SLA-Stufung.
 - **Dynamisches SLA-Dashboard:** Automatische, relative Berechnung verbleibender Stunden bis zum SLA-Ablauf basierend auf einer Systemzeit-Simulation.
 - **Aufgaben-Konvertierung (Ticket-to-Task):** Wandelt eingehende Support-Tickets mit wenigen Klicks in Aufgaben für spezifische IT-Projekte um. Ein modales Formular ermöglicht das Zuweisen von Bearbeiter, Fälligkeit und Projekt-Workspace. Nach Abschluss wird das Ticket automatisch als gelöst markiert.
 
-![PISHI Helpdesk](public/helpdesk.png?v=2)
+![PISHI Helpdesk](public/helpdesk.png?v=3)
 
 ### 4. 🔐 Admin-Panel (Benutzerverwaltung)
 - Übersicht aller aktiven Mitarbeiter mit Name, Rolle, E-Mail und individuellem Farbschema.
 - Anlegen und Bearbeiten von IT-Benutzern inklusive simulierter Passwortänderung.
 - **Kaskadierende Datenlöschung:** Beim Entfernen eines Benutzers wird dieser automatisch aus allen Aufgabenzuweisungen entfernt, um Datenkonsistenz zu gewährleisten (Administratoren-Selbstlöschung ist gesperrt).
 
-![PISHI Admin Panel](public/admin.png?v=2)
+![PISHI Admin Panel](public/admin.png?v=3)
 
 ---
 
