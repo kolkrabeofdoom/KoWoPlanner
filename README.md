@@ -69,7 +69,7 @@ flowchart TD
     classDef info fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff;
 
     E1{{"Offenes Support-Ticket liegt vor"}}:::event --> F1("Konvertierungs-Formular öffnen"):::function
-    Org1["IT-Leiter (Frank Kröner)"]:::org -.-> F1
+    Org1["IT-Leiter"]:::org -.-> F1
     F1 --> E2{{"Parameter-Eingabe (Projekt, Bearbeiter, Fälligkeit)"}}:::event
     E2 --> F2("Konvertierung bestätigen"):::function
     F2 --> F3("Datenbank-Transaktion ausführen"):::function
