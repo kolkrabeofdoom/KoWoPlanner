@@ -32,9 +32,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   const [startDate, setStartDate] = useState(task ? task.startDate : '');
   const [dueDate, setDueDate] = useState(task ? task.dueDate : '');
   const [address, setAddress] = useState(task ? task.address : '');
-  const [checklist, setChecklist] = useState<ChecklistItem[]>(task ? task.checklist : []);
-  const [comments, setComments] = useState<Comment[]>(task ? task.comments : []);
-  const [attachments, setAttachments] = useState<string[]>(task ? task.attachments : []);
+  const [checklist, setChecklist] = useState<ChecklistItem[]>(task && task.checklist ? task.checklist : []);
+  const [comments, setComments] = useState<Comment[]>(task && task.comments ? task.comments : []);
+  const [attachments, setAttachments] = useState<string[]>(task && task.attachments ? task.attachments : []);
 
   // Temporary item states
   const [newChecklistItem, setNewChecklistItem] = useState('');
