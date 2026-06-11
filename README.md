@@ -85,3 +85,8 @@ Der Build wird im Ordner `dist` generiert.
 
 ## 📅 Simulationshinweis
 Da es sich um einen interaktiven Prototyp handelt, basiert die zeitliche Berechnung der Gantt-Charts und SLA-Laufzeiten auf einer simulierten Systemzeit vom **11. Juni 2026, 07:30 Uhr UTC**. Dies stellt sicher, dass die Demodaten jederzeit korrekt gerendert werden.
+
+---
+
+## 📄 Lizenz
+Dieses Projekt ist unter der **GNU General Public License v3.0** lizenziert. Siehe die [LICENSE](LICENSE)-Datei für Details.
