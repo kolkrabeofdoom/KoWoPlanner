@@ -3,6 +3,7 @@ import {
   X, CheckSquare, MessageSquare, Monitor, Trash2, Plus, MessageCircle
 } from 'lucide-react';
 import type { Task, ChecklistItem, Comment, User } from '../data/mockData';
+import { useStore } from '../store/useStore';
 
 interface TaskModalProps {
   task: Task | null; // If null, we are creating a new task
@@ -22,6 +23,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   users
 }) => {
   const isEdit = !!task;
+  const currentUser = useStore(state => state.user);
 
   // Form states
   const [title, setTitle] = useState(task ? task.title : '');
@@ -67,12 +69,13 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   // Comment actions
   const handleAddComment = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
-    
-    // Default author is current user (Frank Kröner, user-1)
+    if (!newComment.trim() || !currentUser) return;
+
+    // The "c-" id marks the comment as unsaved; the server assigns the
+    // real id and takes the author from the JWT when the task is saved.
     const newComm: Comment = {
       id: `c-${Date.now()}`,
-      authorId: 'user-1',
+      authorId: currentUser.id,
       text: newComment.trim(),
       timestamp: new Date().toISOString()
     };

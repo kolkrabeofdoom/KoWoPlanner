@@ -1,20 +1,17 @@
+import { PORT, CORS_ORIGIN } from './config';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import authRouter from './routes/auth';
 import workspacesRouter from './routes/workspaces';
 import tasksRouter from './routes/tasks';
 import ticketsRouter from './routes/tickets';
 import usersRouter from './routes/users';
 
-dotenv.config();
-
 const app = express();
-const PORT = process.env.PORT || 3001;
 
 // Global Middleware
 app.use(cors({
-  origin: '*', // Allow all origins for prototype flexibility, configure properly in production
+  origin: CORS_ORIGIN,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));

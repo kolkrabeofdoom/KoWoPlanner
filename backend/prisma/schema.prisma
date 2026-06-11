@@ -13,6 +13,7 @@ model User {
   email          String    @unique
   passwordHash   String
   role           String
+  isAdmin        Boolean   @default(false)
   avatarInitials String
   color          String
   comments       Comment[]
@@ -37,6 +38,7 @@ model Task {
   startDate   String
   dueDate     String
   address     String          // System / Ort
+  attachments String[]        @default([])
   checklist   ChecklistItem[]
   comments    Comment[]
   assignees   User[]          @relation("TaskAssignees")

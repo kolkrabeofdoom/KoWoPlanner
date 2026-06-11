@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { api } from '../services/api';
+import { api, setUnauthorizedHandler } from '../services/api';
 import type { Task, Workspace, User, Ticket } from '../data/mockData';
 
 interface StoreState {
@@ -15,14 +15,15 @@ interface StoreState {
   // Actions
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  clearError: () => void;
   loadInitialData: () => Promise<void>;
-  
+
   // Workspaces
   createWorkspace: (name: string, description: string) => Promise<void>;
-  
+
   // Tasks
-  createTask: (taskData: Omit<Task, 'id' | 'comments'>) => Promise<void>;
-  updateTask: (taskId: string, taskData: Omit<Task, 'id' | 'comments'>) => Promise<void>;
+  createTask: (taskData: Omit<Task, 'id' | 'comments'>) => Promise<boolean>;
+  updateTask: (taskId: string, taskData: Omit<Task, 'id'>) => Promise<boolean>;
   deleteTask: (taskId: string) => Promise<void>;
   updateTaskStatus: (taskId: string, status: Task['status']) => Promise<void>;
   updateBulkStatus: (taskIds: string[], status: Task['status']) => Promise<void>;
@@ -40,6 +41,9 @@ interface StoreState {
   deleteUser: (userId: string) => Promise<void>;
 }
 
+const errMsg = (err: any, fallback: string): string =>
+  err?.response?.data?.error || fallback;
+
 export const useStore = create<StoreState>((set, get) => ({
   user: null,
   token: localStorage.getItem('kowoplanner_token'),
@@ -55,24 +59,25 @@ export const useStore = create<StoreState>((set, get) => ({
     try {
       const response = await api.post('/auth/login', { email, password });
       const { token, user } = response.data;
-      
+
       localStorage.setItem('kowoplanner_token', token);
       set({ token, user, loading: false });
-      
+
       // Load app data
       await get().loadInitialData();
       return true;
     } catch (err: any) {
-      const errMsg = err.response?.data?.error || 'Login fehlgeschlagen.';
-      set({ error: errMsg, loading: false });
+      set({ error: errMsg(err, 'Login fehlgeschlagen.'), loading: false });
       return false;
     }
   },
 
   logout: () => {
     localStorage.removeItem('kowoplanner_token');
-    set({ user: null, token: null, workspaces: [], tasks: [], tickets: [], usersList: [] });
+    set({ user: null, token: null, workspaces: [], tasks: [], tickets: [], usersList: [], error: null });
   },
+
+  clearError: () => set({ error: null }),
 
   loadInitialData: async () => {
     const { token } = get();
@@ -106,7 +111,7 @@ export const useStore = create<StoreState>((set, get) => ({
       const res = await api.post('/workspaces', { name, description });
       set(state => ({ workspaces: [...state.workspaces, res.data] }));
     } catch (err: any) {
-      console.error(err);
+      set({ error: errMsg(err, 'Arbeitsbereich konnte nicht erstellt werden.') });
     }
   },
 
@@ -114,8 +119,10 @@ export const useStore = create<StoreState>((set, get) => ({
     try {
       const res = await api.post('/tasks', taskData);
       set(state => ({ tasks: [...state.tasks, res.data] }));
+      return true;
     } catch (err: any) {
-      console.error(err);
+      set({ error: errMsg(err, 'Aufgabe konnte nicht erstellt werden.') });
+      return false;
     }
   },
 
@@ -125,51 +132,57 @@ export const useStore = create<StoreState>((set, get) => ({
       set(state => ({
         tasks: state.tasks.map(t => t.id === taskId ? res.data : t)
       }));
+      return true;
     } catch (err: any) {
-      console.error(err);
+      set({ error: errMsg(err, 'Aufgabe konnte nicht aktualisiert werden.') });
+      return false;
     }
   },
 
   deleteTask: async (taskId) => {
+    const previousTasks = get().tasks;
+    set(state => ({ tasks: state.tasks.filter(t => t.id !== taskId) }));
     try {
       await api.delete(`/tasks/${taskId}`);
-      set(state => ({ tasks: state.tasks.filter(t => t.id !== taskId) }));
     } catch (err: any) {
-      console.error(err);
+      set({ tasks: previousTasks, error: errMsg(err, 'Aufgabe konnte nicht gelöscht werden.') });
     }
   },
 
   updateTaskStatus: async (taskId, status) => {
-    // Optimistic update
+    // Optimistic update with rollback on failure
+    const previousTasks = get().tasks;
     set(state => ({
       tasks: state.tasks.map(t => t.id === taskId ? { ...t, status } : t)
     }));
     try {
       await api.put(`/tasks/${taskId}`, { status });
     } catch (err: any) {
-      console.error('Failed to sync task status:', err);
+      set({ tasks: previousTasks, error: errMsg(err, 'Status konnte nicht gespeichert werden.') });
     }
   },
 
   updateBulkStatus: async (taskIds, status) => {
+    const previousTasks = get().tasks;
     set(state => ({
       tasks: state.tasks.map(t => taskIds.includes(t.id) ? { ...t, status } : t)
     }));
     try {
       await api.put('/tasks/bulk/status', { taskIds, status });
     } catch (err: any) {
-      console.error(err);
+      set({ tasks: previousTasks, error: errMsg(err, 'Bulk-Statusaktualisierung fehlgeschlagen.') });
     }
   },
 
   deleteBulkTasks: async (taskIds) => {
+    const previousTasks = get().tasks;
     set(state => ({
       tasks: state.tasks.filter(t => !taskIds.includes(t.id))
     }));
     try {
       await api.post('/tasks/bulk/delete', { taskIds });
     } catch (err: any) {
-      console.error(err);
+      set({ tasks: previousTasks, error: errMsg(err, 'Bulk-Löschen fehlgeschlagen.') });
     }
   },
 
@@ -188,7 +201,7 @@ export const useStore = create<StoreState>((set, get) => ({
         })
       }));
     } catch (err: any) {
-      console.error(err);
+      set({ error: errMsg(err, 'Kommentar konnte nicht hinzugefügt werden.') });
     }
   },
 
@@ -197,18 +210,19 @@ export const useStore = create<StoreState>((set, get) => ({
       const res = await api.post('/tickets', ticketData);
       set(state => ({ tickets: [res.data, ...state.tickets] }));
     } catch (err: any) {
-      console.error(err);
+      set({ error: errMsg(err, 'Support-Ticket konnte nicht erstellt werden.') });
     }
   },
 
   updateTicketStatus: async (ticketId, status) => {
+    const previousTickets = get().tickets;
     set(state => ({
       tickets: state.tickets.map(t => t.id === ticketId ? { ...t, status } : t)
     }));
     try {
       await api.put(`/tickets/${ticketId}/status`, { status });
     } catch (err: any) {
-      console.error(err);
+      set({ tickets: previousTickets, error: errMsg(err, 'Ticket-Status konnte nicht aktualisiert werden.') });
     }
   },
 
@@ -225,7 +239,7 @@ export const useStore = create<StoreState>((set, get) => ({
         tasks: [...state.tasks, task]
       }));
     } catch (err: any) {
-      console.error(err);
+      set({ error: errMsg(err, 'Ticket-Konvertierung fehlgeschlagen.') });
     }
   },
 
@@ -234,7 +248,7 @@ export const useStore = create<StoreState>((set, get) => ({
       const res = await api.post('/users', userData);
       set(state => ({ usersList: [...state.usersList, res.data] }));
     } catch (err: any) {
-      console.error(err);
+      set({ error: errMsg(err, 'Benutzer konnte nicht erstellt werden.') });
     }
   },
 
@@ -245,7 +259,7 @@ export const useStore = create<StoreState>((set, get) => ({
         usersList: state.usersList.map(u => u.id === userId ? res.data : u)
       }));
     } catch (err: any) {
-      console.error(err);
+      set({ error: errMsg(err, 'Benutzer konnte nicht aktualisiert werden.') });
     }
   },
 
@@ -260,7 +274,14 @@ export const useStore = create<StoreState>((set, get) => ({
         }))
       }));
     } catch (err: any) {
-      console.error(err);
+      set({ error: errMsg(err, 'Benutzer konnte nicht gelöscht werden.') });
     }
   }
 }));
+
+// Fully reset the session when the API reports an expired/invalid token
+setUnauthorizedHandler(() => {
+  if (useStore.getState().token) {
+    useStore.getState().logout();
+  }
+});

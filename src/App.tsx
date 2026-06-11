@@ -28,6 +28,8 @@ function App() {
   const tickets = useStore(state => state.tickets);
   const users = useStore(state => state.usersList);
   const loading = useStore(state => state.loading);
+  const error = useStore(state => state.error);
+  const clearError = useStore(state => state.clearError);
 
   const loadInitialData = useStore(state => state.loadInitialData);
   const createTask = useStore(state => state.createTask);
@@ -47,8 +49,15 @@ function App() {
 
   // Global Navigation & Search
   const [currentView, setCurrentView] = useState<string>('dashboard');
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>('ws-1');
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
+
+  // Pick the first workspace once data is loaded (or when the active one disappears)
+  useEffect(() => {
+    if (workspaces.length > 0 && !workspaces.some(ws => ws.id === activeWorkspaceId)) {
+      setActiveWorkspaceId(workspaces[0].id);
+    }
+  }, [workspaces, activeWorkspaceId]);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -139,14 +148,18 @@ function App() {
 
   const handleSaveTask = async (savedTask: Task) => {
     const isNew = !tasks.some(t => t.id === savedTask.id);
+    let success: boolean;
     if (isNew) {
       const { id: _, ...taskData } = savedTask;
-      await createTask(taskData);
+      success = await createTask(taskData);
     } else {
       const { id, ...taskData } = savedTask;
-      await updateTask(id, taskData);
+      success = await updateTask(id, taskData);
     }
-    setIsModalOpen(false);
+    // Keep the modal (and the user's input) open if saving failed
+    if (success) {
+      setIsModalOpen(false);
+    }
   };
 
   const handleDeleteTask = async (taskId: string) => {
@@ -168,14 +181,14 @@ function App() {
   };
 
   // User Actions (Admin Panel)
-  const handleSaveUser = async (savedUser: User) => {
+  const handleSaveUser = async (savedUser: User, password?: string) => {
     const exists = users.some(u => u.id === savedUser.id);
     if (exists) {
       const { id, ...userData } = savedUser;
-      await updateUser(id, userData);
+      await updateUser(id, password ? { ...userData, password } : userData);
     } else {
       const { id: _, ...userData } = savedUser;
-      await createUser({ ...userData, password: 'PASSWORT' });
+      await createUser({ ...userData, password });
     }
   };
 
@@ -265,9 +278,17 @@ function App() {
           />
         );
       case 'admin':
+        if (!user?.isAdmin) {
+          return (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '50vh', color: 'var(--text-secondary)' }}>
+              Kein Zugriff: Das Admin-Panel erfordert Administrator-Rechte.
+            </div>
+          );
+        }
         return (
-          <AdminView 
+          <AdminView
             users={users}
+            currentUserId={currentUser.id}
             onSaveUser={handleSaveUser}
             onDeleteUser={handleDeleteUser}
           />
@@ -312,6 +333,27 @@ function App() {
           onAddTask={() => handleOpenCreateTask(undefined, undefined)}
           onLogout={logout}
         />
+
+        {/* Global error banner */}
+        {error && (
+          <div
+            role="alert"
+            style={{
+              margin: '12px 24px 0', padding: '10px 16px', borderRadius: '8px',
+              backgroundColor: 'rgba(239, 68, 68, 0.12)', border: '1px solid var(--danger, #ef4444)',
+              color: 'var(--danger, #ef4444)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px'
+            }}
+          >
+            <span>{error}</span>
+            <button
+              onClick={clearError}
+              style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontWeight: 700 }}
+              aria-label="Fehlermeldung schließen"
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         {/* View Page Container */}
         <div className="page-container">
