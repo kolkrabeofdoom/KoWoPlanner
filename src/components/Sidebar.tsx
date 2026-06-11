@@ -37,7 +37,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'gantt', label: 'Gantt-Timeline', icon: Milestone },
     { id: 'mytasks', label: 'Meine Aufgaben', icon: CheckSquare },
     { id: 'support', label: 'IT-Support Helpdesk', icon: LifeBuoy },
-    { id: 'admin', label: 'Admin-Panel', icon: Shield },
+    // Admin panel is only available to administrators (enforced again server-side)
+    ...(currentUser.isAdmin ? [{ id: 'admin', label: 'Admin-Panel', icon: Shield }] : []),
   ];
 
   return (

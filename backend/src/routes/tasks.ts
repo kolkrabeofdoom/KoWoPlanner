@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { prisma } from '../db';
 import { authenticateJWT, AuthenticatedRequest } from '../middleware/auth';
+import { TASK_STATUSES, PRIORITIES, isOneOf } from '../validate';
 
 const router = Router();
 
@@ -49,11 +50,18 @@ router.post('/', authenticateJWT, async (req: AuthenticatedRequest, res: Respons
     dueDate,
     address,
     assignees, // array of user IDs
-    checklist // array of checklist items
+    checklist, // array of checklist items
+    attachments // array of file names / links
   } = req.body;
 
   if (!workspaceId || !title) {
     return res.status(400).json({ error: 'Arbeitsbereich-ID und Titel sind erforderlich.' });
+  }
+  if (status !== undefined && !isOneOf(status, TASK_STATUSES)) {
+    return res.status(400).json({ error: 'Ungültiger Status.' });
+  }
+  if (priority !== undefined && !isOneOf(priority, PRIORITIES)) {
+    return res.status(400).json({ error: 'Ungültige Priorität.' });
   }
 
   try {
@@ -67,6 +75,7 @@ router.post('/', authenticateJWT, async (req: AuthenticatedRequest, res: Respons
         startDate: startDate || new Date().toISOString().split('T')[0],
         dueDate: dueDate || new Date().toISOString().split('T')[0],
         address: address || '',
+        attachments: Array.isArray(attachments) ? attachments.map(String) : [],
         assignees: assignees && assignees.length > 0 ? {
           connect: assignees.map((id: string) => ({ id }))
         } : undefined,
@@ -108,76 +117,78 @@ router.put('/:id', authenticateJWT, async (req: AuthenticatedRequest, res: Respo
     address,
     assignees, // array of user IDs
     checklist, // array of checklist items text & completed
-    comments // array of comments
+    comments, // array of comments
+    attachments // array of file names / links
   } = req.body;
 
+  if (status !== undefined && !isOneOf(status, TASK_STATUSES)) {
+    return res.status(400).json({ error: 'Ungültiger Status.' });
+  }
+  if (priority !== undefined && !isOneOf(priority, PRIORITIES)) {
+    return res.status(400).json({ error: 'Ungültige Priorität.' });
+  }
+
+  const currentUserId = req.user!.id;
+
   try {
-    // 1. Clear checklist items for this task, we will recreate them
-    if (checklist) {
-      await prisma.checklistItem.deleteMany({ where: { taskId: id } });
-    }
+    const task = await prisma.$transaction(async (tx) => {
+      // 1. Replace checklist items if a new list was provided
+      if (checklist) {
+        await tx.checklistItem.deleteMany({ where: { taskId: id } });
+      }
 
-    // 2. Sync comments
-    if (comments && Array.isArray(comments)) {
-      for (const c of comments) {
-        if (!c.text || !c.text.trim()) continue;
+      // 2. Persist new comments (existing ones are identified by their DB id;
+      //    client-generated ids like "c-..." / "temp-..." mark unsaved comments).
+      //    The author is always taken from the JWT, never from the client payload.
+      if (comments && Array.isArray(comments)) {
+        for (const c of comments) {
+          if (!c.text || !c.text.trim()) continue;
 
-        let exists = false;
-        if (c.id && !c.id.startsWith('c-') && !c.id.startsWith('temp-')) {
-          const check = await prisma.comment.findFirst({
-            where: { id: c.id }
-          });
-          if (check) exists = true;
-        } else {
-          const check = await prisma.comment.findFirst({
-            where: {
-              taskId: id,
-              authorId: c.authorId,
-              text: c.text.trim()
-            }
-          });
-          if (check) exists = true;
-        }
+          const isPersisted = c.id && !String(c.id).startsWith('c-') && !String(c.id).startsWith('temp-')
+            ? Boolean(await tx.comment.findFirst({ where: { id: c.id } }))
+            : false;
 
-        if (!exists) {
-          await prisma.comment.create({
-            data: {
-              taskId: id,
-              authorId: c.authorId,
-              text: c.text.trim(),
-              timestamp: c.timestamp ? new Date(c.timestamp) : new Date()
-            }
-          });
+          if (!isPersisted) {
+            await tx.comment.create({
+              data: {
+                taskId: id,
+                authorId: currentUserId,
+                text: c.text.trim(),
+                timestamp: c.timestamp ? new Date(c.timestamp) : new Date()
+              }
+            });
+          }
         }
       }
-    }
 
-    // 3. Update task details and connect assignees
-    const task = await prisma.task.update({
-      where: { id },
-      data: {
-        title,
-        description,
-        status,
-        priority,
-        startDate,
-        dueDate,
-        address,
-        assignees: assignees ? {
-          set: assignees.map((userId: string) => ({ id: userId }))
-        } : undefined,
-        checklist: checklist && checklist.length > 0 ? {
-          create: checklist.map((item: any) => ({
-            text: item.text,
-            completed: item.completed || false
-          }))
-        } : undefined
-      },
-      include: {
-        assignees: true,
-        checklist: true,
-        comments: true
-      }
+      // 3. Update task details and connect assignees
+      return tx.task.update({
+        where: { id },
+        data: {
+          title,
+          description,
+          status,
+          priority,
+          startDate,
+          dueDate,
+          address,
+          attachments: Array.isArray(attachments) ? attachments.map(String) : undefined,
+          assignees: assignees ? {
+            set: assignees.map((userId: string) => ({ id: userId }))
+          } : undefined,
+          checklist: checklist && checklist.length > 0 ? {
+            create: checklist.map((item: any) => ({
+              text: item.text,
+              completed: item.completed || false
+            }))
+          } : undefined
+        },
+        include: {
+          assignees: true,
+          checklist: true,
+          comments: true
+        }
+      });
     });
 
     res.json({
@@ -245,8 +256,8 @@ router.post('/:id/comments', authenticateJWT, async (req: AuthenticatedRequest, 
 router.put('/bulk/status', authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
   const { taskIds, status } = req.body;
 
-  if (!taskIds || !Array.isArray(taskIds) || !status) {
-    return res.status(400).json({ error: 'Aufgaben-IDs und Status sind erforderlich.' });
+  if (!taskIds || !Array.isArray(taskIds) || !isOneOf(status, TASK_STATUSES)) {
+    return res.status(400).json({ error: 'Aufgaben-IDs und gültiger Status sind erforderlich.' });
   }
 
   try {

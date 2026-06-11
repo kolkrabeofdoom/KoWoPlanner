@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# Secrets / Umgebungsvariablen (nur .env.example committen)
+.env
+.env.*
+!.env.example
+
+# Office-Entwürfe
+*.docx
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

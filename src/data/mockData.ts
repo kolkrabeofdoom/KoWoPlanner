@@ -5,6 +5,7 @@ export interface User {
   role: string;
   email: string;
   color: string;
+  isAdmin?: boolean;
 }
 
 export interface ChecklistItem {

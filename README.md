@@ -137,13 +137,31 @@ cd KoWoPlanner
 npm install
 ```
 
-### 3. Entwicklungsserver starten
+### 3. Umgebungsvariablen konfigurieren
+Backend und Docker-Setup benötigen Secrets, die **nicht** im Repository liegen:
 ```bash
+# Für das Backend (lokale Entwicklung):
+cp backend/.env.example backend/.env
+# Für Docker Compose:
+cp .env.example .env
+```
+Anschließend in den `.env`-Dateien ein starkes `JWT_SECRET` (z.B. via `openssl rand -base64 48`) und das Datenbank-Passwort eintragen. Ohne gesetztes `JWT_SECRET` startet das Backend nicht.
+
+### 4. Entwicklungsserver starten
+```bash
+# Backend (Port 3001):
+cd backend && npm install && npm run db:migrate && npm run db:seed && npm run dev
+# Frontend (Port 5173, proxyt /api automatisch an das Backend):
 npm run dev
 ```
 Der Planer läuft standardmäßig auf [http://localhost:5173](http://localhost:5173).
 
-### 4. Produktions-Build erstellen
+Alternativ mit Docker Compose (Frontend auf Port 80, Migrationen laufen automatisch):
+```bash
+docker compose up --build
+```
+
+### 5. Produktions-Build erstellen
 Um die App für den Release zu kompilieren und zu validieren:
 ```bash
 npm run build

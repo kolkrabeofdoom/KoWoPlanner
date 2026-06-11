@@ -2,10 +2,26 @@ import { Router, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../db';
+import { JWT_SECRET } from '../config';
 import { authenticateJWT, AuthenticatedRequest } from '../middleware/auth';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'kowoplanner_jwt_secret_2026_it_department';
+
+// Simple in-memory brute-force protection per IP+email
+const MAX_ATTEMPTS = 10;
+const WINDOW_MS = 15 * 60 * 1000;
+const loginAttempts = new Map<string, { count: number; firstAttempt: number }>();
+
+const isRateLimited = (key: string): boolean => {
+  const entry = loginAttempts.get(key);
+  const now = Date.now();
+  if (!entry || now - entry.firstAttempt > WINDOW_MS) {
+    loginAttempts.set(key, { count: 1, firstAttempt: now });
+    return false;
+  }
+  entry.count++;
+  return entry.count > MAX_ATTEMPTS;
+};
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
@@ -15,19 +31,25 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ error: 'E-Mail und Passwort müssen angegeben werden.' });
   }
 
+  if (isRateLimited(`${req.ip}|${email}`)) {
+    return res.status(429).json({ error: 'Zu viele Anmeldeversuche. Bitte warten Sie 15 Minuten.' });
+  }
+
   try {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return res.status(401).json({ error: 'Ungültige E-Mail-Adresse oder Passwort.' });
     }
 
-    const isMatch = bcrypt.compareSync(password, user.passwordHash);
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
       return res.status(401).json({ error: 'Ungültige E-Mail-Adresse oder Passwort.' });
     }
 
+    loginAttempts.delete(`${req.ip}|${email}`);
+
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
+      { id: user.id, email: user.email, role: user.role, isAdmin: user.isAdmin },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
