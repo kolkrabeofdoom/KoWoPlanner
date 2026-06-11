@@ -18,8 +18,8 @@ export const LoginView: React.FC = () => {
 
   const handleQuickLogin = async (quickEmail: string) => {
     setEmail(quickEmail);
-    setPassword('passwort123');
-    await login(quickEmail, 'passwort123');
+    setPassword('PASSWORT');
+    await login(quickEmail, 'PASSWORT');
   };
 
   return (
