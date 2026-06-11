@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Bell, Sun, Moon, Plus } from 'lucide-react';
+import { Search, Bell, Sun, Moon, Plus, LogOut } from 'lucide-react';
 import type { Workspace } from '../data/mockData';
 
 interface HeaderProps {
@@ -10,6 +10,7 @@ interface HeaderProps {
   darkMode: boolean;
   toggleDarkMode: () => void;
   onAddTask: () => void;
+  onLogout: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -19,7 +20,8 @@ export const Header: React.FC<HeaderProps> = ({
   setSearchTerm,
   darkMode,
   toggleDarkMode,
-  onAddTask
+  onAddTask,
+  onLogout
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -77,6 +79,11 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Theme Toggle */}
         <button className="theme-toggle-btn" onClick={toggleDarkMode} title="Farbschema umschalten">
           {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
+
+        {/* Logout Button */}
+        <button className="theme-toggle-btn" onClick={onLogout} title="Abmelden">
+          <LogOut size={18} />
         </button>
 
         {/* Notification Bell */}
