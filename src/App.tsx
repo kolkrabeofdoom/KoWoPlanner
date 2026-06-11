@@ -175,7 +175,7 @@ function App() {
       await updateUser(id, userData);
     } else {
       const { id: _, ...userData } = savedUser;
-      await createUser({ ...userData, password: 'passwort123' });
+      await createUser({ ...userData, password: 'PASSWORT' });
     }
   };
 
