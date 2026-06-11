@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    color-scheme:light;
+    --bg-app:#eef1f5;--bg-card:#ffffff;--bg-subtle:#f8fafc;--bg-hover:#f6f8fb;
+    --border:#e7eaf0;--border-soft:#f1f4f8;--border-input:#e3e7ee;
+    --ink:#0f172a;--ink-2:#475569;--ink-3:#64748b;--muted:#94a3b8;--faint:#b8c0cc;
+    --chip:#f1f5f9;
+    --primary:#0a8fd6;--primary-btn:#0a8fd6;--primary-btn-hover:#0876b3;--primary-tint:#eaf6fd;
+    --green:#16a34a;--green-tint:#e7f6ec;
+    --shadow-card:0 1px 2px rgba(16,24,40,.04);--shadow-pop:0 8px 22px rgba(16,24,40,.07);
+    --btn-shadow:0 4px 12px rgba(10,143,214,.28);
+  }
+  body.dark{
+    color-scheme:dark;
+    --bg-app:#0a0f1a;--bg-card:#121a2c;--bg-subtle:#0f1626;--bg-hover:#16203a;
+    --border:#1e2a42;--border-soft:#1a2438;--border-input:#27344f;
+    --ink:#f1f5f9;--ink-2:#cbd5e1;--ink-3:#94a3b8;--muted:#64748b;--faint:#475569;
+    --chip:#1e293b;
+    --primary:#38bdf8;--primary-btn:#0284c7;--primary-btn-hover:#0a8fd6;--primary-tint:rgba(56,189,248,.13);
+    --green:#34d399;--green-tint:rgba(52,211,153,.13);
+    --shadow-card:0 1px 2px rgba(0,0,0,.35);--shadow-pop:0 10px 24px rgba(0,0,0,.5);
+    --btn-shadow:0 4px 12px rgba(2,132,199,.35);
+  }
+  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:var(--bg-app)}
+  svg{display:block}
+  input::placeholder{color:var(--muted)}
+  .kw-moon{display:flex}
+  .kw-sun{display:none}
+  body.dark .kw-moon{display:none}
+  body.dark .kw-sun{display:flex}
+</style>
+<script>try{if(localStorage.getItem('kowo-theme')==='dark'){document.body.classList.add('dark')}}catch(e){}</script>
+</helmet>
+
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background-color:var(--bg-app);background-image:radial-gradient(900px 600px at 85% -5%,var(--primary-tint) 0%,transparent 65%);color:var(--ink)">
+
+  <button onClick="{{ toggleTheme }}" title="Dark Mode umschalten" style="position:fixed;top:20px;right:20px;width:42px;height:42px;border-radius:11px;background:var(--bg-card);border:1px solid var(--border-input);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-2);z-index:50" style-hover="background:var(--bg-subtle);color:var(--ink)">
+    <span class="kw-moon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5A8.5 8.5 0 1 1 11.5 3 6.6 6.6 0 0 0 21 12.5z"/></svg></span>
+    <span class="kw-sun"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><line x1="12" y1="2.5" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21.5"/><line x1="2.5" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21.5" y2="12"/><line x1="5.3" y1="5.3" x2="7" y2="7"/><line x1="17" y1="17" x2="18.7" y2="18.7"/><line x1="17" y1="7" x2="18.7" y2="5.3"/><line x1="5.3" y1="18.7" x2="7" y2="17"/></svg></span>
+  </button>
+
+  <div style="width:100%;max-width:440px;background:var(--bg-card);border:1px solid var(--border);border-radius:22px;padding:40px;box-shadow:var(--shadow-pop)">
+
+    <div style="display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:30px">
+      <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,#22b9e8,#0a8fd6 55%,#0d9488);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;font-size:22px;color:#fff;letter-spacing:-.02em;box-shadow:0 8px 18px rgba(10,143,214,.35);margin-bottom:16px">KP</div>
+      <div style="font-family:'Space Grotesk';font-size:26px;font-weight:600;letter-spacing:-.02em;color:var(--ink)">KoWoPlanner</div>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:6px;font-weight:500">IT-Projektplaner &amp; Helpdesk · KOWOBAU</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><polyline points="3,7 12,13.5 21,7"/></svg>
+          E-Mail-Adresse
+        </div>
+        <input type="email" placeholder="z. B. frank.kroener@kowobau.de" style="width:100%;background:var(--bg-subtle);border:1px solid var(--border-input);border-radius:11px;padding:12px 14px;font-family:'Plus Jakarta Sans';font-size:13.5px;color:var(--ink);outline:none" style-focus="border-color:var(--primary)">
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg>
+          Passwort
+        </div>
+        <input type="password" placeholder="••••••••" style="width:100%;background:var(--bg-subtle);border:1px solid var(--border-input);border-radius:11px;padding:12px 14px;font-family:'Plus Jakarta Sans';font-size:13.5px;color:var(--ink);outline:none" style-focus="border-color:var(--primary)">
+      </div>
+      <a href="KoWoPlanner Dashboard.dc.html" style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--primary-btn);color:#fff;border-radius:12px;padding:13px;font-size:14px;font-weight:600;text-decoration:none;box-shadow:var(--btn-shadow);margin-top:4px" style-hover="background:var(--primary-btn-hover)">
+        Anmelden
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13,6 19,12 13,18"/></svg>
+      </a>
+    </div>
+
+    <div style="margin-top:30px;border-top:1px solid var(--border-soft);padding-top:22px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Schnellanmeldung (Demo)</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <a href="KoWoPlanner Dashboard.dc.html" style="display:flex;align-items:center;gap:12px;background:var(--bg-subtle);border:1px solid var(--border-input);border-radius:12px;padding:10px 14px;text-decoration:none" style-hover="border-color:var(--primary);background:var(--primary-tint)">
+          <div style="width:32px;height:32px;border-radius:50%;background:#0ea5e9;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">FK</div>
+          <div style="min-width:0">
+            <div style="font-size:13px;font-weight:600;color:var(--ink)">Frank Kröner</div>
+            <div style="font-size:11px;color:var(--muted)">IT-Leiter KOWOBAU · Admin</div>
+          </div>
+          <svg style="margin-left:auto" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,6 15,12 9,18"/></svg>
+        </a>
+        <a href="KoWoPlanner Dashboard.dc.html" style="display:flex;align-items:center;gap:12px;background:var(--bg-subtle);border:1px solid var(--border-input);border-radius:12px;padding:10px 14px;text-decoration:none" style-hover="border-color:var(--primary);background:var(--primary-tint)">
+          <div style="width:32px;height:32px;border-radius:50%;background:#8b5cf6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">SS</div>
+          <div style="min-width:0">
+            <div style="font-size:13px;font-weight:600;color:var(--ink)">Sabine Schmidt</div>
+            <div style="font-size:11px;color:var(--muted)">Systemadministratorin</div>
+          </div>
+          <svg style="margin-left:auto" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,6 15,12 9,18"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:24px;font-size:11px;color:var(--faint);font-weight:500">Version 1.0.0 (Beta) · Simulierte Systemzeit: 11. Juni 2026</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      toggleTheme: () => {
+        const dark = document.body.classList.toggle('dark');
+        try { localStorage.setItem('kowo-theme', dark ? 'dark' : 'light'); } catch (e) {}
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

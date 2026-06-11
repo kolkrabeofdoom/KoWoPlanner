@@ -86,7 +86,7 @@ function App() {
 
   // Theme state
   const [darkMode, setDarkMode] = useState<boolean>(() => {
-    const saved = localStorage.getItem('kowoplanner_dark');
+    const saved = localStorage.getItem('pishi_dark');
     if (saved) return saved === 'true';
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
@@ -104,7 +104,7 @@ function App() {
     } else {
       document.body.classList.remove('dark');
     }
-    localStorage.setItem('kowoplanner_dark', darkMode.toString());
+    localStorage.setItem('pishi_dark', darkMode.toString());
   }, [darkMode]);
 
   // Redirect to Login if token is missing
@@ -273,6 +273,7 @@ function App() {
         return (
           <MyTasksView 
             tasks={tasks} // personal inbox across ALL workspaces
+            workspaces={workspaces}
             onSelectTask={handleOpenTask}
             onUpdateTaskStatus={handleUpdateTaskStatus}
           />

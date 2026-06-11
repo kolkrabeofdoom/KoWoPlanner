@@ -123,240 +123,315 @@ export const AdminView: React.FC<AdminViewProps> = ({
   };
 
   return (
-    <div className="animate-fade">
-      <div style={{ marginBottom: '24px' }}>
-        <p className="page-subtitle">Verwalten Sie KOWOBAU Teammitglieder, Berechtigungen und Passwörter</p>
-      </div>
-
-      <div className="task-modal-layout">
-        
-        {/* Left Side: Users Table */}
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Shield size={18} color="var(--primary)" />
-            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>Aktive Accounts</h3>
+    <div className="animate-fade" style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+      
+      {/* Left Column: Active Accounts */}
+      <div style={{ flex: 1.6, minWidth: 0, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '18px', padding: '24px', boxShadow: 'var(--shadow-card)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ display: 'flex', alignItems: 'center', width: '32px', height: '32px', borderRadius: '10px', background: 'var(--primary-tint)', color: 'var(--primary)', justifyContent: 'center' }}>
+            <Shield size={17} strokeWidth={1.8} />
+          </span>
+          <div>
+            <div style={{ fontFamily: 'Space Grotesk', fontSize: '15px', fontWeight: 600, color: 'var(--ink)', letterSpacing: '-.01em' }}>Aktive Accounts</div>
+            <div style={{ fontSize: '11.5px', color: 'var(--muted)', marginTop: '1px' }}>Teammitglieder, Berechtigungen &amp; Passwörter</div>
           </div>
-          <table className="list-table">
-            <thead>
-              <tr>
-                <th style={{ width: '60px' }}>Avatar</th>
-                <th>Name / E-Mail</th>
-                <th>Rolle</th>
-                <th style={{ width: '130px', textAlign: 'right' }}>Aktionen</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map(user => (
-                <tr key={user.id} style={{ cursor: 'default' }}>
-                  <td>
-                    <div 
-                      style={{ 
-                        width: '36px', 
-                        height: '36px', 
-                        borderRadius: '50%', 
-                        backgroundColor: user.color, 
-                        color: 'white', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center',
-                        fontWeight: 700,
-                        fontSize: '0.85rem'
-                      }}
-                    >
-                      {user.avatarInitials}
-                    </div>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{user.name}</span>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{user.email}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <span className="badge badge-secondary" style={{ fontSize: '0.7rem' }}>{user.role}</span>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                      <button 
-                        className="theme-toggle-btn" 
-                        style={{ padding: '6px', borderRadius: '6px' }}
-                        onClick={() => handleEditClick(user)}
-                        title="Bearbeiten"
-                      >
-                        <Edit2 size={14} />
-                      </button>
-                      <button
-                        className="theme-toggle-btn"
-                        style={{ padding: '6px', borderRadius: '6px', color: 'var(--danger)' }}
-                        onClick={() => handleDeleteClick(user.id, user.name)}
-                        disabled={user.id === currentUserId}
-                        title={user.id === currentUserId ? 'Eigener Account' : 'Löschen'}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <span style={{ marginLeft: 'auto', fontSize: '11px', fontWeight: 700, color: 'var(--ink-3)', background: 'var(--chip)', borderRadius: '999px', padding: '3px 10px' }}>
+            {users.length} Mitglieder
+          </span>
         </div>
 
-        {/* Right Side: Add / Edit Form */}
-        <div className="card">
-          <h3 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.05rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '14px' }}>
-            <UserPlus size={18} color="var(--primary)" />
-            {editingUser ? 'Account bearbeiten' : 'Neuen Account anlegen'}
-          </h3>
+        {/* Table Header Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 200px 90px', gap: '0 16px', alignItems: 'center', marginTop: '20px', padding: '0 6px 10px', borderBottom: '1px solid var(--border-soft)' }}>
+          <div style={{ fontSize: '10.5px', letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 700 }}>Mitglied</div>
+          <div style={{ fontSize: '10.5px', letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 700 }}>Rolle</div>
+          <div style={{ fontSize: '10.5px', letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted)', textAlign: 'right', fontWeight: 700 }}>Aktionen</div>
+        </div>
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
-            
-            {/* Name */}
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Vollständiger Name</label>
-              <input 
-                type="text" 
-                className="form-control" 
-                value={name}
-                onChange={(e) => handleNameChange(e.target.value)}
-                placeholder="z.B. Max Mustermann"
-                required
-              />
-            </div>
-
-            {/* Email */}
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">E-Mail-Adresse</label>
-              <input 
-                type="email" 
-                className="form-control" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="z.B. m.mustermann@kowobau.de"
-                required
-              />
-            </div>
-
-            {/* Initials & Color Selector */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '16px' }}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Kürzel (max. 2)</label>
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  value={initials}
-                  onChange={(e) => setInitials(e.target.value.substring(0,2).toUpperCase())}
-                  placeholder="MM"
-                  maxLength={2}
-                  required
-                />
+        {/* Rows */}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {users.map((user) => (
+            <div 
+              key={user.id} 
+              style={{ display: 'grid', gridTemplateColumns: '1fr 200px 90px', gap: '0 16px', alignItems: 'center', padding: '13px 6px', borderBottom: '1px solid var(--border-soft)', transition: 'background-color var(--transition-fast)' }}
+              className="hover-timeline-row"
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: user.color, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12.5px', fontWeight: 700, flex: 'none' }}>
+                  {user.avatarInitials}
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                    <span style={{ fontSize: '13.5px', fontWeight: 600, color: 'var(--ink)' }}>{user.name}</span>
+                    {user.isAdmin && (
+                      <span style={{ fontSize: '9.5px', fontWeight: 700, letterSpacing: '.06em', color: 'var(--primary)', background: 'var(--primary-tint)', padding: '2px 7px', borderRadius: '6px' }}>ADMIN</span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '1px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {user.email}
+                  </div>
+                </div>
               </div>
-
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Rolle</label>
-                <select 
-                  className="form-control" 
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                >
-                  <option value="Projektleiter KOWOBAU">Projektleiter KOWOBAU</option>
-                  <option value="Kundenbetreuerin">Kundenbetreuerin</option>
-                  <option value="Hausmeister / Handwerker">Hausmeister / Handwerker</option>
-                  <option value="Technikerin Instandhaltung">Technikerin Instandhaltung</option>
-                  <option value="Administrator">Administrator</option>
-                </select>
+              
+              <div>
+                <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--ink-2)', background: 'var(--chip)', padding: '4px 10px', borderRadius: '999px', whiteSpace: 'nowrap' }}>
+                  {user.role}
+                </span>
               </div>
-            </div>
-
-            {/* Password */}
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Key size={12} />
-                <span>{editingUser ? 'Neues Passwort (leer lassen = unverändert)' : 'Initialpasswort festlegen'}</span>
-              </label>
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  className="form-control"
-                  style={{ width: '100%', paddingRight: '40px' }}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder={editingUser ? 'Unverändert' : `Mind. ${MIN_PASSWORD_LENGTH} Zeichen`}
-                  autoComplete="new-password"
-                />
+              
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
                 <button 
-                  type="button"
-                  style={{ position: 'absolute', right: '12px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-                  onClick={() => setShowPassword(!showPassword)}
+                  title="Bearbeiten" 
+                  onClick={() => handleEditClick(user)}
+                  style={{ width: '32px', height: '32px', borderRadius: '9px', border: '1px solid var(--border-input)', background: 'var(--bg-card)', color: 'var(--ink-3)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
+                  className="hover-btn-secondary"
                 >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  <Edit2 size={14} />
+                </button>
+                <button 
+                  title={user.id === currentUserId ? 'Eigenes Admin-Konto kann nicht gelöscht werden' : 'Löschen'} 
+                  onClick={() => handleDeleteClick(user.id, user.name)}
+                  disabled={user.id === currentUserId}
+                  style={{ 
+                    width: '32px', 
+                    height: '32px', 
+                    borderRadius: '9px', 
+                    border: '1px solid var(--border-input)', 
+                    background: 'var(--bg-card)', 
+                    color: 'var(--ink-3)', 
+                    cursor: user.id === currentUserId ? 'not-allowed' : 'pointer', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    opacity: user.id === currentUserId ? 0.35 : 1
+                  }} 
+                  className={user.id === currentUserId ? '' : 'hover-btn-delete'}
+                >
+                  <Trash2 size={14} />
                 </button>
               </div>
             </div>
+          ))}
+        </div>
 
-            {/* Admin rights */}
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', cursor: editingUser?.id === currentUserId ? 'not-allowed' : 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={isAdmin}
-                  onChange={(e) => setIsAdmin(e.target.checked)}
-                  disabled={editingUser?.id === currentUserId}
-                />
-                <span>Administrator-Rechte (Benutzerverwaltung)</span>
-              </label>
+        {/* Info Banner */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '9px', marginTop: '18px', padding: '12px 14px', background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)', borderRadius: '12px' }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flex: 'none', marginTop: '1px' }}>
+            <circle cx="12" cy="12" r="9" />
+            <line x1="12" y1="11" x2="12" y2="16.5" />
+            <circle cx="12" cy="7.8" r="0.5" fill="var(--muted)" />
+          </svg>
+          <span style={{ fontSize: '12px', color: 'var(--ink-3)', lineHeight: '1.5' }}>
+            Beim Löschen eines Accounts wird das Mitglied automatisch aus allen Aufgaben-Zuweisungen entfernt (kaskadierende Datenlöschung). Das eigene Admin-Konto kann nicht gelöscht werden.
+          </span>
+        </div>
+      </div>
+
+      {/* Right Column: Add / Edit Account Form */}
+      <div style={{ flex: 1, minWidth: 0, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '18px', padding: '24px', boxShadow: 'var(--shadow-card)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ display: 'flex', alignItems: 'center', width: '32px', height: '32px', borderRadius: '10px', background: editingUser ? 'var(--primary-tint)' : 'var(--green-tint)', color: editingUser ? 'var(--primary)' : 'var(--green)', justifyContent: 'center' }}>
+            <UserPlus size={17} strokeWidth={1.8} />
+          </span>
+          <div>
+            <div style={{ fontFamily: 'Space Grotesk', fontSize: '15px', fontWeight: 600, color: 'var(--ink)', letterSpacing: '-.01em' }}>
+              {editingUser ? 'Account bearbeiten' : 'Neuen Account anlegen'}
             </div>
+            <div style={{ fontSize: '11.5px', color: 'var(--muted)', marginTop: '1px' }}>
+              {editingUser ? 'Accountdetails und Passwörter anpassen' : 'Zugang für ein neues Teammitglied'}
+            </div>
+          </div>
+        </div>
 
-            {/* Color circles selection */}
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '22px' }}>
+          
+          {/* Name */}
+          <div>
+            <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '6px' }}>Vollständiger Name</div>
+            <input 
+              type="text" 
+              className="form-control"
+              value={name} 
+              onChange={(e) => handleNameChange(e.target.value)} 
+              placeholder="z. B. Max Mustermann" 
+              style={{ width: '100%', background: 'var(--bg-subtle)', border: '1px solid var(--border-input)', borderRadius: '10px', padding: '10px 13px', fontSize: '13.5px', color: 'var(--ink)', outline: 'none' }}
+              required
+            />
+          </div>
+
+          {/* Email */}
+          <div>
+            <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '6px' }}>E-Mail-Adresse</div>
+            <input 
+              type="email" 
+              className="form-control"
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)} 
+              placeholder="z. B. m.mustermann@kowobau.de" 
+              style={{ width: '100%', background: 'var(--bg-subtle)', border: '1px solid var(--border-input)', borderRadius: '10px', padding: '10px 13px', fontSize: '13.5px', color: 'var(--ink)', outline: 'none' }}
+              required
+            />
+          </div>
+
+          {/* Initials & Role Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr', gap: '12px' }}>
             <div>
-              <label className="form-label" style={{ display: 'block', marginBottom: '8px' }}>Profilfarbe</label>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {colorOptions.map(opt => (
+              <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '6px' }}>Kürzel</div>
+              <input 
+                type="text" 
+                className="form-control"
+                value={initials} 
+                onChange={(e) => setInitials(e.target.value.substring(0,2).toUpperCase())} 
+                maxLength={2} 
+                placeholder="MM" 
+                style={{ width: '100%', background: 'var(--bg-subtle)', border: '1px solid var(--border-input)', borderRadius: '10px', padding: '10px 13px', fontSize: '13.5px', color: 'var(--ink)', outline: 'none', textTransform: 'uppercase' }}
+                required
+              />
+            </div>
+            <div>
+              <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '6px' }}>Rolle</div>
+              <select 
+                value={role} 
+                onChange={(e) => setRole(e.target.value)} 
+                style={{ width: '100%', background: 'var(--bg-subtle)', border: '1px solid var(--border-input)', borderRadius: '10px', padding: '10px 11px', fontSize: '13.5px', color: 'var(--ink)', outline: 'none' }}
+              >
+                <option value="IT-Mitarbeiter:in">IT-Mitarbeiter:in</option>
+                <option value="Systemadministrator:in">Systemadministrator:in</option>
+                <option value="IT-Support &amp; Hardware">IT-Support &amp; Hardware</option>
+                <option value="Softwareentwickler:in">Softwareentwickler:in</option>
+                <option value="IT-Leiter KOWOBAU">IT-Leiter KOWOBAU</option>
+                <option value="Projektleiter KOWOBAU">Projektleiter KOWOBAU</option>
+                <option value="Kundenbetreuerin">Kundenbetreuerin</option>
+                <option value="Hausmeister / Handwerker">Hausmeister / Handwerker</option>
+                <option value="Technikerin Instandhaltung">Technikerin Instandhaltung</option>
+                <option value="Administrator">Administrator</option>
+                <option value="Systemadministratorin">Systemadministratorin</option>
+                <option value="Softwareentwicklerin">Softwareentwicklerin</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Password */}
+          <div>
+            <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '6px' }}>
+              {editingUser ? 'Neues Passwort (leer lassen = unverändert)' : 'Initialpasswort festlegen'}
+            </div>
+            <div style={{ position: 'relative' }}>
+              <input 
+                type={showPassword ? 'text' : 'password'} 
+                className="form-control"
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={editingUser ? 'Unverändert' : `Mind. ${MIN_PASSWORD_LENGTH} Zeichen`} 
+                style={{ width: '100%', background: 'var(--bg-subtle)', border: '1px solid var(--border-input)', borderRadius: '10px', padding: '10px 42px 10px 13px', fontSize: '13.5px', color: 'var(--ink)', outline: 'none' }}
+                autoComplete="new-password"
+              />
+              <button 
+                type="button"
+                title={showPassword ? 'Passwort ausblenden' : 'Passwort anzeigen'} 
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)', width: '30px', height: '30px', border: 'none', background: 'transparent', color: 'var(--muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}
+              >
+                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Admin rights */}
+          <div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: editingUser?.id === currentUserId ? 'not-allowed' : 'pointer', color: 'var(--ink-2)' }}>
+              <input
+                type="checkbox"
+                checked={isAdmin}
+                onChange={(e) => setIsAdmin(e.target.checked)}
+                disabled={editingUser?.id === currentUserId}
+                style={{ cursor: 'pointer' }}
+              />
+              <span>Administrator-Rechte (Benutzerverwaltung)</span>
+            </label>
+          </div>
+
+          {/* Color selector */}
+          <div>
+            <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '8px' }}>Profilfarbe</div>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              {colorOptions.map(opt => {
+                const isSelected = color === opt.value;
+                return (
                   <button
                     key={opt.value}
                     type="button"
+                    title={opt.label}
+                    onClick={() => setColor(opt.value)}
                     style={{
-                      width: '28px',
-                      height: '28px',
+                      width: '26px',
+                      height: '26px',
                       borderRadius: '50%',
                       backgroundColor: opt.value,
-                      border: color === opt.value ? '2px solid var(--text-primary)' : '1px solid transparent',
-                      boxShadow: color === opt.value ? '0 0 0 2px var(--bg-card)' : 'none',
+                      border: 'none',
                       cursor: 'pointer',
-                      transition: 'transform var(--transition-fast)'
+                      boxShadow: isSelected ? `0 0 0 2px var(--bg-card), 0 0 0 4px ${opt.value}` : 'none',
+                      transition: 'all var(--transition-fast)'
                     }}
-                    onClick={() => setColor(opt.value)}
-                    title={opt.label}
                   />
-                ))}
-              </div>
+                );
+              })}
             </div>
+          </div>
 
-            {/* Form actions */}
-            <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
+          {/* Form Actions */}
+          <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
+            <button 
+              type="submit"
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                background: 'var(--primary-btn)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '11px',
+                padding: '12px',
+                fontFamily: 'Plus Jakarta Sans',
+                fontSize: '13.5px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                boxShadow: 'var(--btn-shadow)'
+              }}
+              className="hover-btn-primary"
+            >
+              {editingUser ? 'Speichern' : 'Account erstellen'}
+            </button>
+            {(editingUser || name) && (
               <button 
-                type="submit" 
-                className="btn btn-primary" 
-                style={{ flex: 1, fontSize: '0.85rem' }}
+                type="button"
+                onClick={handleCancel}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-input)',
+                  borderRadius: '11px',
+                  padding: '12px 18px',
+                  fontFamily: 'Plus Jakarta Sans',
+                  fontSize: '13.5px',
+                  fontWeight: 600,
+                  color: 'var(--ink-2)',
+                  cursor: 'pointer'
+                }}
+                className="hover-btn-secondary"
               >
-                {editingUser ? 'Änderungen speichern' : 'Account erstellen'}
+                Abbrechen
               </button>
-              {(editingUser || name) && (
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
-                  onClick={handleCancel}
-                  style={{ fontSize: '0.85rem' }}
-                >
-                  Abbrechen
-                </button>
-              )}
-            </div>
+            )}
+          </div>
 
-          </form>
-        </div>
-
+        </form>
       </div>
+
     </div>
   );
 };

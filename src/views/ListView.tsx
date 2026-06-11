@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   SlidersHorizontal, CheckSquare, Trash2, ArrowUpDown, 
-  Monitor, Calendar, Play
+  Monitor, Calendar, Play, Check, X
 } from 'lucide-react';
 import type { Task, User } from '../data/mockData';
 
@@ -62,26 +62,6 @@ export const ListView: React.FC<ListViewProps> = ({
         });
         return newSelection;
       });
-    }
-  };
-
-  // Status mapping to german
-  const getStatusText = (status: Task['status']) => {
-    switch (status) {
-      case 'planning': return 'In Planung';
-      case 'in_progress': return 'In Bearbeitung';
-      case 'completed': return 'Erledigt';
-      default: return status;
-    }
-  };
-
-  const getPriorityText = (priority: Task['priority']) => {
-    switch (priority) {
-      case 'low': return 'Niedrig';
-      case 'medium': return 'Mittel';
-      case 'high': return 'Hoch';
-      case 'urgent': return 'Dringend';
-      default: return priority;
     }
   };
 
@@ -159,291 +139,415 @@ export const ListView: React.FC<ListViewProps> = ({
     }
   };
 
-  return (
-    <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      
-      {/* Filters & Header Toolbar */}
-      <div className="board-header-bar">
-        
-        {/* Filters */}
-        <div className="filters-wrapper">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-            <SlidersHorizontal size={14} />
-            <span>Filter:</span>
-          </div>
+  // Date Label Helper (Simulated time: June 11, 2026)
+  const getDueDateLabel = (dueDateStr: string, isCompleted: boolean) => {
+    if (!dueDateStr) return null;
+    const parts = dueDateStr.split('-');
+    if (parts.length < 3) return { text: dueDateStr, isOverdue: false, isUrgent: false };
 
-          {/* Status Filter */}
+    const year = parseInt(parts[0]);
+    const month = parseInt(parts[1]);
+    const day = parseInt(parts[2]);
+
+    // Format date string as DD.MM.YYYY
+    const formattedDate = `${day < 10 ? '0' + day : day}.${month < 10 ? '0' + month : month}.${year}`;
+
+    if (isCompleted) {
+      return { text: formattedDate, label: null, isOverdue: false, isUrgent: false };
+    }
+
+    // Since our system date is June 11, 2026
+    if (year === 2026 && month === 6) {
+      if (day === 11) {
+        return { text: formattedDate, label: 'Heute fällig', isOverdue: false, isUrgent: true };
+      } else if (day === 12) {
+        return { text: formattedDate, label: 'Morgen fällig', isOverdue: false, isUrgent: true };
+      } else if (day < 11) {
+        return { text: formattedDate, label: 'Überfällig', isOverdue: true, isUrgent: true };
+      }
+    } else if (year < 2026 || (year === 2026 && month < 6)) {
+      return { text: formattedDate, label: 'Überfällig', isOverdue: true, isUrgent: true };
+    }
+
+    return { text: formattedDate, label: null, isOverdue: false, isUrgent: false };
+  };
+
+  const allSelected = sortedTasks.length > 0 && sortedTasks.every(t => selectedTaskIds.includes(t.id));
+
+  return (
+    <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      
+      {/* Filters Toolbar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        {/* Status Filter Dropdown */}
+        <div style={{ position: 'relative' }}>
           <select 
-            className="form-control" 
-            style={{ padding: '6px 12px', fontSize: '0.85rem', minWidth: '130px' }}
+            style={{
+              appearance: 'none',
+              WebkitAppearance: 'none',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-input)',
+              borderRadius: '10px',
+              padding: '9px 34px 9px 14px',
+              fontFamily: 'var(--font-sans)',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: 'var(--ink-2)',
+              cursor: 'pointer',
+              outline: 'none',
+            }}
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
           >
-            <option value="all">Alle Stati</option>
+            <option value="all">Status: Alle</option>
             <option value="planning">Status: In Planung</option>
             <option value="in_progress">Status: In Bearbeitung</option>
             <option value="completed">Status: Erledigt</option>
           </select>
+          <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--ink-3)' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6,9 12,15 18,9"/></svg>
+          </div>
+        </div>
 
-          {/* Priority Filter */}
+        {/* Priority Filter Dropdown */}
+        <div style={{ position: 'relative' }}>
           <select 
-            className="form-control" 
-            style={{ padding: '6px 12px', fontSize: '0.85rem', minWidth: '130px' }}
+            style={{
+              appearance: 'none',
+              WebkitAppearance: 'none',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-input)',
+              borderRadius: '10px',
+              padding: '9px 34px 9px 14px',
+              fontFamily: 'var(--font-sans)',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: 'var(--ink-2)',
+              cursor: 'pointer',
+              outline: 'none',
+            }}
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value)}
           >
-            <option value="all">Alle Prioritäten</option>
+            <option value="all">Priorität: Alle</option>
             <option value="low">Priorität: Niedrig</option>
             <option value="medium">Priorität: Mittel</option>
             <option value="high">Priorität: Hoch</option>
             <option value="urgent">Priorität: Dringend</option>
           </select>
+          <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--ink-3)' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6,9 12,15 18,9"/></svg>
+          </div>
+        </div>
 
-          {/* Assignee Filter */}
+        {/* Assignee Filter Dropdown */}
+        <div style={{ position: 'relative' }}>
           <select 
-            className="form-control" 
-            style={{ padding: '6px 12px', fontSize: '0.85rem', minWidth: '150px' }}
+            style={{
+              appearance: 'none',
+              WebkitAppearance: 'none',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-input)',
+              borderRadius: '10px',
+              padding: '9px 34px 9px 14px',
+              fontFamily: 'var(--font-sans)',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: 'var(--ink-2)',
+              cursor: 'pointer',
+              outline: 'none',
+            }}
             value={filterAssignee}
             onChange={(e) => setFilterAssignee(e.target.value)}
           >
-            <option value="all">Alle Mitarbeiter</option>
+            <option value="all">Zuständig: Alle</option>
             {users.map(u => (
-              <option key={u.id} value={u.id}>Mitarbeiter: {u.name}</option>
+              <option key={u.id} value={u.id}>Zuständig: {u.name}</option>
             ))}
           </select>
+          <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--ink-3)' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6,9 12,15 18,9"/></svg>
+          </div>
         </div>
 
         {/* Total stats */}
-        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
-          Ergebnisse: <strong style={{ color: 'var(--text-primary)' }}>{sortedTasks.length}</strong> Aufgaben
-        </div>
+        <span style={{ marginLeft: 'auto', fontSize: '12.5px', fontWeight: 500, color: 'var(--muted)' }}>
+          {sortedTasks.length} {sortedTasks.length === 1 ? 'Aufgabe' : 'Aufgaben'} · sortiert nach {sortField === 'dueDate' ? 'Fälligkeit' : sortField === 'title' ? 'Titel' : sortField === 'priority' ? 'Priorität' : 'Status'}
+        </span>
       </div>
 
       {/* Bulk Action Toolbar */}
       {selectedTaskIds.length > 0 && (
-        <div className="list-bulk-actions">
-          <span className="list-bulk-text">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--primary-tint)', border: '1px solid var(--border-input)', borderRadius: '12px', padding: '10px 16px' }}>
+          <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--primary)' }}>
             {selectedTaskIds.length} {selectedTaskIds.length === 1 ? 'Aufgabe ausgewählt' : 'Aufgaben ausgewählt'}
           </span>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button 
-              className="btn btn-secondary" 
-              style={{ padding: '6px 12px', fontSize: '0.8rem', gap: '6px', color: 'var(--success)', borderColor: 'var(--success)' }}
-              onClick={() => handleBulkStatus('completed')}
-            >
-              <CheckSquare size={14} />
-              Als Erledigt markieren
-            </button>
-            <button 
-              className="btn btn-secondary" 
-              style={{ padding: '6px 12px', fontSize: '0.8rem', gap: '6px', color: 'var(--primary)', borderColor: 'var(--primary)' }}
-              onClick={() => handleBulkStatus('in_progress')}
-            >
-              <Play size={14} />
-              In Bearbeitung setzen
-            </button>
-            <button 
-              className="btn btn-secondary" 
-              style={{ padding: '6px 12px', fontSize: '0.8rem', gap: '6px', color: 'var(--danger)', borderColor: 'var(--danger)' }}
-              onClick={handleBulkDelete}
-            >
-              <Trash2 size={14} />
-              Ausgewählte löschen
-            </button>
-          </div>
+          <span style={{ width: '1px', height: '18px', background: 'var(--border-input)' }} />
+          
+          <button 
+            className="btn btn-secondary" 
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-input)', borderRadius: '9px', padding: '7px 12px', fontSize: '12px', fontWeight: 600, color: 'var(--ink-2)' }}
+            onClick={() => handleBulkStatus('completed')}
+          >
+            Als Erledigt markieren
+          </button>
+          <button 
+            className="btn btn-secondary" 
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-input)', borderRadius: '9px', padding: '7px 12px', fontSize: '12px', fontWeight: 600, color: 'var(--ink-2)' }}
+            onClick={() => handleBulkStatus('in_progress')}
+          >
+            In Bearbeitung setzen
+          </button>
+          <button 
+            className="btn" 
+            style={{ background: 'var(--red-tint)', border: 'none', borderRadius: '9px', padding: '7px 12px', fontSize: '12px', fontWeight: 700, color: 'var(--red)', cursor: 'pointer' }}
+            onClick={handleBulkDelete}
+          >
+            Löschen
+          </button>
+          
+          <button 
+            title="Auswahl aufheben" 
+            style={{ marginLeft: 'auto', width: '28px', height: '28px', border: 'none', background: 'transparent', color: 'var(--ink-3)', cursor: 'pointer', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={() => setSelectedTaskIds([])}
+          >
+            <X size={14} />
+          </button>
         </div>
       )}
 
-      {/* List Table Grid Card */}
-      <div className="card list-table-card">
-        <table className="list-table">
-          <thead>
-            <tr>
-              <th style={{ width: '40px', paddingRight: 0 }}>
-                <input 
-                  type="checkbox" 
-                  className="list-table-checkbox" 
-                  checked={sortedTasks.length > 0 && sortedTasks.every(t => selectedTaskIds.includes(t.id))}
-                  onChange={() => handleSelectAll(sortedTasks)}
-                />
-              </th>
-              
-              <th onClick={() => handleSort('title')} style={{ cursor: 'pointer' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  Aufgabe
-                  <ArrowUpDown size={12} />
-                </div>
-              </th>
-
-              <th onClick={() => handleSort('status')} style={{ cursor: 'pointer', width: '150px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  Status
-                  <ArrowUpDown size={12} />
-                </div>
-              </th>
-
-              <th onClick={() => handleSort('priority')} style={{ cursor: 'pointer', width: '130px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  Priorität
-                  <ArrowUpDown size={12} />
-                </div>
-              </th>
-
-              <th>System / Ort</th>
-              
-              <th style={{ width: '130px' }}>Zuständig</th>
-              
-              <th onClick={() => handleSort('dueDate')} style={{ cursor: 'pointer', width: '140px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  Fälligkeit
-                  <ArrowUpDown size={12} />
-                </div>
-              </th>
-
-              <th style={{ width: '110px' }}>Checklist</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedTasks.length === 0 ? (
-              <tr>
-                <td colSpan={8} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                  Keine Aufgaben gefunden, die den Filtern entsprechen.
-                </td>
-              </tr>
+      {/* Grid Card Layout (No table tag) */}
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '18px', padding: '10px 24px 14px', boxShadow: 'var(--shadow-card)' }}>
+        
+        {/* Table Header Row */}
+        <div style={{ display: 'grid', gridTemplateColumns: '36px minmax(0,1fr) 136px 104px 104px 110px', gap: '0 12px', alignItems: 'center', padding: '12px 0 10px', borderBottom: '1px solid var(--border-soft)' }}>
+          {/* Checkbox Header */}
+          <div onClick={() => handleSelectAll(sortedTasks)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+            {allSelected ? (
+              <span style={{ width: '18px', height: '18px', borderRadius: '6px', background: 'var(--primary-btn)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Check size={11} stroke="#fff" strokeWidth={3} />
+              </span>
             ) : (
-              sortedTasks.map((task) => {
-                const safeAssignees = task.assignees || [];
-                const assignees = users.filter(u => safeAssignees.includes(u.id));
-                const safeChecklist = task.checklist || [];
-                const totalCheck = safeChecklist.length;
-                const completedCheck = safeChecklist.filter(c => c.completed).length;
-                const checkPercent = totalCheck > 0 ? Math.round((completedCheck / totalCheck) * 100) : 0;
-                const isSelected = selectedTaskIds.includes(task.id);
-                const isOverdue = task.status !== 'completed' && task.dueDate && task.dueDate < new Date().toISOString().split('T')[0];
-
-                return (
-                  <tr 
-                    key={task.id} 
-                    onClick={() => onSelectTask(task)}
-                    style={{ backgroundColor: isSelected ? 'var(--primary-alpha)' : '' }}
-                  >
-                    {/* Selection Checkbox */}
-                    <td onClick={(e) => e.stopPropagation()} style={{ paddingRight: 0 }}>
-                      <input 
-                        type="checkbox" 
-                        className="list-table-checkbox"
-                        checked={isSelected}
-                        onChange={(e) => handleSelectTask(task.id, e as any)}
-                      />
-                    </td>
-
-                    {/* Task Title */}
-                    <td>
-                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{task.title}</span>
-                    </td>
-
-                    {/* Status Badge */}
-                    <td>
-                      <span className={`badge badge-${task.status === 'completed' ? 'success' : task.status === 'in_progress' ? 'primary' : 'warning'}`}>
-                        {getStatusText(task.status)}
-                      </span>
-                    </td>
-
-                    {/* Priority Badge */}
-                    <td>
-                      <span className={`badge badge-${task.priority === 'urgent' ? 'danger' : task.priority === 'high' ? 'danger' : task.priority === 'medium' ? 'warning' : 'info'}`}>
-                        {getPriorityText(task.priority)}
-                      </span>
-                    </td>
-
-                     {/* System / Location */}
-                     <td>
-                       {task.address ? (
-                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                           <Monitor size={12} color="var(--text-muted)" />
-                           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>
-                             {task.address}
-                           </span>
-                         </div>
-                       ) : (
-                         <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>-</span>
-                       )}
-                     </td>
-
-                    {/* Assignees stack */}
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        {assignees.map(user => (
-                          <div 
-                            key={user.id}
-                            style={{
-                              width: '24px',
-                              height: '24px',
-                              borderRadius: '50%',
-                              backgroundColor: user.color,
-                              color: 'white',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '0.65rem',
-                              fontWeight: 700,
-                              border: '2px solid var(--bg-card)',
-                              marginLeft: '-6px'
-                            }}
-                            title={user.name}
-                          >
-                            {user.avatarInitials}
-                          </div>
-                        ))}
-                        {assignees.length === 0 && (
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>-</span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Due Date */}
-                    <td>
-                      {task.dueDate ? (
-                        <div style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          gap: '6px', 
-                          fontSize: '0.85rem',
-                          color: isOverdue ? 'var(--danger)' : 'var(--text-secondary)',
-                          fontWeight: isOverdue ? 700 : 500
-                        }}>
-                          <Calendar size={12} />
-                          <span>
-                            {new Date(task.dueDate).toLocaleDateString('de-DE')}
-                          </span>
-                        </div>
-                      ) : (
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>-</span>
-                      )}
-                    </td>
-
-                    {/* Checklist stats */}
-                    <td>
-                      {totalCheck > 0 ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>{completedCheck}/{totalCheck} ({checkPercent}%)</span>
-                          <div style={{ height: '4px', backgroundColor: 'var(--border-color)', borderRadius: '2px', overflow: 'hidden' }}>
-                            <div style={{ height: '100%', backgroundColor: 'var(--success)', width: `${checkPercent}%` }} />
-                          </div>
-                        </div>
-                      ) : (
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>-</span>
-                      )}
-                    </td>
-
-                  </tr>
-                );
-              })
+              <span style={{ width: '18px', height: '18px', borderRadius: '6px', border: '1.5px solid var(--border-input)', display: 'block' }} />
             )}
-          </tbody>
-        </table>
+          </div>
+          
+          {/* Column Sort Buttons */}
+          <button onClick={() => handleSort('title')} style={{ display: 'flex', alignItems: 'center', gap: '5px', border: 'none', background: 'transparent', fontFamily: 'var(--font-sans)', fontSize: '10.5px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: sortField === 'title' ? 'var(--primary)' : 'var(--muted)', cursor: 'pointer', padding: 0 }}>
+            Aufgabe
+            <ArrowUpDown size={11} />
+          </button>
+          
+          <button onClick={() => handleSort('status')} style={{ display: 'flex', alignItems: 'center', gap: '5px', border: 'none', background: 'transparent', fontFamily: 'var(--font-sans)', fontSize: '10.5px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: sortField === 'status' ? 'var(--primary)' : 'var(--muted)', cursor: 'pointer', padding: 0 }}>
+            Status
+            <ArrowUpDown size={11} />
+          </button>
+          
+          <button onClick={() => handleSort('priority')} style={{ display: 'flex', alignItems: 'center', gap: '5px', border: 'none', background: 'transparent', fontFamily: 'var(--font-sans)', fontSize: '10.5px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: sortField === 'priority' ? 'var(--primary)' : 'var(--muted)', cursor: 'pointer', padding: 0 }}>
+            Priorität
+            <ArrowUpDown size={11} />
+          </button>
+          
+          <span style={{ fontFamily: 'var(--font-sans)', fontSize: '10.5px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+            Zuständige
+          </span>
+          
+          <button onClick={() => handleSort('dueDate')} style={{ display: 'flex', alignItems: 'center', gap: '5px', border: 'none', background: 'transparent', fontFamily: 'var(--font-sans)', fontSize: '10.5px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: sortField === 'dueDate' ? 'var(--primary)' : 'var(--muted)', cursor: 'pointer', padding: 0 }}>
+            Fälligkeit
+            <ArrowUpDown size={11} />
+          </button>
+        </div>
+
+        {/* Table Rows */}
+        {sortedTasks.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+            Keine Aufgaben gefunden, die den Filtern entsprechen.
+          </div>
+        ) : (
+          sortedTasks.map((task) => {
+            const safeAssignees = task.assignees || [];
+            const assignees = users.filter(u => safeAssignees.includes(u.id));
+            const safeChecklist = task.checklist || [];
+            const totalCheck = safeChecklist.length;
+            const completedCheck = safeChecklist.filter(c => c.completed).length;
+            const isSelected = selectedTaskIds.includes(task.id);
+            const isCompleted = task.status === 'completed';
+
+            // Generate subtitle string
+            const subtitleParts = [];
+            if (task.address) {
+              subtitleParts.push(task.address);
+            }
+            if (totalCheck > 0) {
+              subtitleParts.push(`${completedCheck}/${totalCheck} Unteraufgaben`);
+            }
+            const subtitle = subtitleParts.join(' · ');
+
+            // Calculate Due Date status labels
+            const dateInfo = getDueDateLabel(task.dueDate || '', isCompleted);
+
+            return (
+              <div 
+                key={task.id} 
+                onClick={() => onSelectTask(task)}
+                style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '36px minmax(0,1fr) 136px 104px 104px 110px', 
+                  gap: '0 12px', 
+                  alignItems: 'center', 
+                  padding: '13px 0', 
+                  borderBottom: '1px solid var(--border-soft)',
+                  opacity: isCompleted ? 0.65 : 1,
+                  background: isSelected ? 'var(--primary-tint)' : 'transparent',
+                  transition: 'background var(--transition-fast)',
+                  cursor: 'pointer'
+                }}
+                className="hover-timeline-row"
+              >
+                {/* Selection Checkbox Cell */}
+                <div onClick={(e) => handleSelectTask(task.id, e)} style={{ display: 'flex', alignItems: 'center' }}>
+                  {isSelected ? (
+                    <span style={{ width: '18px', height: '18px', borderRadius: '6px', background: 'var(--primary-btn)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                      <Check size={11} stroke="#fff" strokeWidth={3} />
+                    </span>
+                  ) : (
+                    <span style={{ width: '18px', height: '18px', borderRadius: '6px', border: '1.5px solid var(--border-input)', display: 'block', cursor: 'pointer' }} />
+                  )}
+                </div>
+
+                {/* Title and details */}
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ 
+                    fontSize: '13.5px', 
+                    fontWeight: 600, 
+                    color: isCompleted ? 'var(--ink-2)' : 'var(--ink)', 
+                    textDecoration: isCompleted ? 'line-through' : 'none',
+                    textDecorationColor: 'var(--faint)',
+                    textDecorationThickness: '1px',
+                    whiteSpace: 'nowrap', 
+                    overflow: 'hidden', 
+                    textOverflow: 'ellipsis' 
+                  }}>
+                    {task.title}
+                  </div>
+                  {subtitle && (
+                    <div style={{ fontSize: '11.5px', color: 'var(--muted)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {subtitle}
+                    </div>
+                  )}
+                </div>
+
+                {/* Status Badge */}
+                <div>
+                  {task.status === 'completed' && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: 'var(--green)', background: 'var(--green-tint)', padding: '4px 10px', borderRadius: '999px' }}>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--green)' }} />
+                      Erledigt
+                    </span>
+                  )}
+                  {task.status === 'in_progress' && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: 'var(--primary)', background: 'var(--primary-tint)', padding: '4px 10px', borderRadius: '999px' }}>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary)' }} />
+                      In Bearbeitung
+                    </span>
+                  )}
+                  {task.status === 'planning' && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: 'var(--amber)', background: 'var(--amber-tint)', padding: '4px 10px', borderRadius: '999px' }}>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--gold)' }} />
+                      In Planung
+                    </span>
+                  )}
+                </div>
+
+                {/* Priority Badge */}
+                <div>
+                  {task.priority === 'urgent' && (
+                    <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '.05em', color: 'var(--red)', background: 'var(--red-tint)', padding: '4px 9px', borderRadius: '7px' }}>
+                      URGENT
+                    </span>
+                  )}
+                  {task.priority === 'high' && (
+                    <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '.05em', color: 'var(--amber-deep)', background: 'var(--amber-tint)', padding: '4px 9px', borderRadius: '7px' }}>
+                      HIGH
+                    </span>
+                  )}
+                  {task.priority === 'medium' && (
+                    <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '.05em', color: 'var(--primary)', background: 'var(--primary-tint)', padding: '4px 9px', borderRadius: '7px' }}>
+                      MEDIUM
+                    </span>
+                  )}
+                  {task.priority === 'low' && (
+                    <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '.05em', color: 'var(--ink-3)', background: 'var(--chip)', padding: '4px 9px', borderRadius: '7px' }}>
+                      LOW
+                    </span>
+                  )}
+                </div>
+
+                {/* Assignees stack */}
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  {assignees.map((user, uIdx) => (
+                    <div 
+                      key={user.id}
+                      style={{
+                        width: '26px',
+                        height: '26px',
+                        borderRadius: '50%',
+                        backgroundColor: user.color,
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        border: '2px solid var(--bg-card)',
+                        marginLeft: uIdx > 0 ? '-8px' : '0',
+                        zIndex: 5 - uIdx
+                      }}
+                      title={user.name}
+                    >
+                      {user.avatarInitials}
+                    </div>
+                  ))}
+                  {assignees.length === 0 && (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>-</span>
+                  )}
+                </div>
+
+                {/* Due Date Cell with status notifications */}
+                <div>
+                  {dateInfo ? (
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ 
+                        fontSize: '12.5px', 
+                        fontWeight: dateInfo.isUrgent ? 700 : 600, 
+                        color: dateInfo.isOverdue ? 'var(--red)' : 'var(--ink-2)', 
+                        fontVariantNumeric: 'tabular-nums' 
+                      }}>
+                        {dateInfo.text}
+                      </div>
+                      {dateInfo.label && (
+                        <div style={{ 
+                          fontSize: '11px', 
+                          fontWeight: 600, 
+                          color: dateInfo.isOverdue ? 'var(--red)' : 'var(--amber)', 
+                          marginTop: '1px' 
+                        }}>
+                          {dateInfo.label}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>-</span>
+                  )}
+                </div>
+
+              </div>
+            );
+          })
+        )}
       </div>
 
     </div>
   );
 };
+

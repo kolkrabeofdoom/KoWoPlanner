@@ -46,7 +46,7 @@ const errMsg = (err: any, fallback: string): string =>
 
 export const useStore = create<StoreState>((set, get) => ({
   user: null,
-  token: localStorage.getItem('kowoplanner_token'),
+  token: localStorage.getItem('pishi_token'),
   workspaces: [],
   tasks: [],
   tickets: [],
@@ -60,7 +60,7 @@ export const useStore = create<StoreState>((set, get) => ({
       const response = await api.post('/auth/login', { email, password });
       const { token, user } = response.data;
 
-      localStorage.setItem('kowoplanner_token', token);
+      localStorage.setItem('pishi_token', token);
       set({ token, user, loading: false });
 
       // Load app data
@@ -73,7 +73,7 @@ export const useStore = create<StoreState>((set, get) => ({
   },
 
   logout: () => {
-    localStorage.removeItem('kowoplanner_token');
+    localStorage.removeItem('pishi_token');
     set({ user: null, token: null, workspaces: [], tasks: [], tickets: [], usersList: [], error: null });
   },
 

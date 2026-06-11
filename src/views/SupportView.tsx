@@ -84,7 +84,7 @@ export const SupportView: React.FC<SupportViewProps> = ({
   // SLA Calculation Helper (Simulation Base Time: June 11, 2026, 07:30:00 UTC)
   const getSlaDetails = (ticket: Ticket) => {
     if (ticket.status === 'resolved') {
-      return { text: 'Gelöst', color: 'var(--success)', badgeClass: 'badge-success' };
+      return { text: 'Gelöst', color: 'var(--green)', bg: 'var(--green-tint)' };
     }
 
     const now = new Date('2026-06-11T07:30:00Z').getTime();
@@ -95,13 +95,11 @@ export const SupportView: React.FC<SupportViewProps> = ({
     const roundedRemaining = Math.max(0, Math.round(remaining * 10) / 10);
 
     if (remaining <= 0) {
-      return { text: 'SLA Überschritten!', color: 'var(--danger)', badgeClass: 'badge-danger' };
-    } else if (remaining <= 2) {
-      return { text: `${roundedRemaining} Std. (Kritisch)`, color: 'var(--danger)', badgeClass: 'badge-danger' };
+      return { text: 'SLA Überschritten!', color: 'var(--red)', bg: 'var(--red-tint)' };
     } else if (remaining <= 8) {
-      return { text: `${roundedRemaining} Std. (Achtung)`, color: 'var(--warning)', badgeClass: 'badge-warning' };
+      return { text: `SLA · ${roundedRemaining} Std. verbleibend`, color: 'var(--amber-deep)', bg: 'var(--amber-tint)' };
     } else {
-      return { text: `${roundedRemaining} Std. verbleibend`, color: 'var(--success)', badgeClass: 'badge-success' };
+      return { text: `SLA · ${roundedRemaining} Std. verbleibend`, color: 'var(--green)', bg: 'var(--green-tint)' };
     }
   };
 
@@ -115,170 +113,281 @@ export const SupportView: React.FC<SupportViewProps> = ({
     return matchesTab && matchesSearch;
   });
 
-  const getPriorityBadgeClass = (priority: Ticket['priority']) => {
-    switch (priority) {
-      case 'urgent': return 'badge-danger';
-      case 'high': return 'badge-danger';
-      case 'medium': return 'badge-warning';
-      case 'low': return 'badge-info';
-      default: return 'badge-secondary';
+  const parseReporter = (reporterName: string) => {
+    const match = reporterName.match(/^(.*?)\s*\((.*?)\)$/);
+    if (match) {
+      return { name: match[1], dept: match[2] };
     }
-  };
-
-  const getCategoryColor = (cat: Ticket['category']) => {
-    switch (cat) {
-      case 'Hardware': return '#10b981'; // green
-      case 'Software': return '#0ea5e9'; // cyan
-      case 'Netzwerk': return '#8b5cf6'; // purple
-      case 'Berechtigungen': return '#f59e0b'; // amber
-      default: return 'var(--text-muted)';
-    }
+    return { name: reporterName, dept: '' };
   };
 
   return (
-    <div className="animate-fade">
-      <div style={{ marginBottom: '24px' }}>
-        <p className="page-subtitle">Verwalten Sie eingehende Störungsmeldungen und wandeln Sie diese direkt in IT-Projekt-Aufgaben um</p>
-      </div>
-
-      <div className="task-modal-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '24px' }}>
-        
-        {/* Left Column: Form to submit ticket */}
-        <div className="card" style={{ height: 'fit-content' }}>
-          <h3 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.05rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '14px' }}>
-            <LifeBuoy size={18} color="var(--primary)" />
-            Support-Meldung erfassen
-          </h3>
-
-          <form onSubmit={handleSubmitTicket} style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '14px' }}>
-            
-            {/* Title */}
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Titel / Problem</label>
-              <input 
-                type="text" 
-                className="form-control" 
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="z.B. Outlook startet nicht"
-                required
-              />
+    <div className="animate-fade" style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+      
+      {/* Left Column: Form to submit ticket */}
+      <div style={{ 
+        width: '380px', 
+        flex: 'none', 
+        background: 'var(--bg-card)', 
+        border: '1px solid var(--border)', 
+        borderRadius: '18px', 
+        padding: '24px', 
+        boxShadow: 'var(--shadow-card)', 
+        position: 'sticky', 
+        top: '96px' 
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            width: '32px', 
+            height: '32px', 
+            borderRadius: '10px', 
+            background: 'var(--primary-tint)', 
+            color: 'var(--primary)' 
+          }}>
+            <LifeBuoy size={17} strokeWidth={1.8} />
+          </span>
+          <div>
+            <div style={{ fontFamily: 'Space Grotesk', fontSize: '15px', fontWeight: 600, color: 'var(--ink)', letterSpacing: '-.01em' }}>
+              Support-Meldung erfassen
             </div>
-
-            {/* Reporter */}
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Melder / Abteilung</label>
-              <input 
-                type="text" 
-                className="form-control" 
-                value={reporter}
-                onChange={(e) => setReporter(e.target.value)}
-                placeholder="z.B. Brigitte Schmidt (Mietverwaltung)"
-                required
-              />
+            <div style={{ fontSize: '11.5px', color: 'var(--muted)', marginTop: '1px' }}>
+              SLA wird automatisch berechnet
             </div>
-
-            {/* Description */}
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Problembeschreibung</label>
-              <textarea 
-                className="form-control" 
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Genaue Fehlerbeschreibung oder Anforderung..."
-                rows={3}
-                required
-              />
-            </div>
-
-            {/* Category & Priority Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Kategorie</label>
-                <select 
-                  className="form-control" 
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as Ticket['category'])}
-                >
-                  <option value="Hardware">Hardware</option>
-                  <option value="Software">Software</option>
-                  <option value="Netzwerk">Netzwerk</option>
-                  <option value="Berechtigungen">Berechtigungen</option>
-                </select>
-              </div>
-
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Priorität</label>
-                <select 
-                  className="form-control" 
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value as Ticket['priority'])}
-                >
-                  <option value="low">Niedrig</option>
-                  <option value="medium">Mittel</option>
-                  <option value="high">Hoch</option>
-                  <option value="urgent">Urgent</option>
-                </select>
-              </div>
-            </div>
-
-            {/* SLA Time */}
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">SLA Lösungszeit (Stunden)</label>
-              <input 
-                type="number" 
-                className="form-control" 
-                value={slaHours}
-                onChange={(e) => setSlaHours(Number(e.target.value))}
-                min={1}
-                required
-              />
-            </div>
-
-            <button 
-              type="submit" 
-              className="btn btn-primary" 
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', marginTop: '6px' }}
-            >
-              <Send size={14} />
-              <span>Ticket einreichen</span>
-            </button>
-          </form>
+          </div>
         </div>
 
-        {/* Right Column: Ticket Management Dashboard */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form onSubmit={handleSubmitTicket} style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '22px' }}>
           
-          {/* Header toolbar */}
-          <div className="card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-            {/* Search */}
-            <div className="header-search" style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '300px', flex: 1 }}>
-              <Laptop size={14} color="var(--text-muted)" />
-              <input 
-                type="text" 
-                placeholder="Tickets suchen..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: '0.85rem', width: '100%', color: 'var(--text-primary)' }}
-              />
+          {/* Title */}
+          <div>
+            <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '6px' }}>Titel / Problem</div>
+            <input 
+              type="text" 
+              className="form-control" 
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="z. B. Outlook startet nicht"
+              style={{
+                width: '100%', 
+                background: 'var(--bg-subtle)', 
+                border: '1px solid var(--border-input)', 
+                borderRadius: '10px', 
+                padding: '10px 13px', 
+                fontSize: '13.5px', 
+                color: 'var(--ink)', 
+                outline: 'none'
+              }}
+              required
+            />
+          </div>
+
+          {/* Reporter */}
+          <div>
+            <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '6px' }}>Melder / Abteilung</div>
+            <input 
+              type="text" 
+              className="form-control" 
+              value={reporter}
+              onChange={(e) => setReporter(e.target.value)}
+              placeholder="z. B. Brigitte Schmitz (Mietverwaltung)"
+              style={{
+                width: '100%', 
+                background: 'var(--bg-subtle)', 
+                border: '1px solid var(--border-input)', 
+                borderRadius: '10px', 
+                padding: '10px 13px', 
+                fontSize: '13.5px', 
+                color: 'var(--ink)', 
+                outline: 'none'
+              }}
+              required
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '6px' }}>Problembeschreibung</div>
+            <textarea 
+              className="form-control" 
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Genaue Fehlerbeschreibung oder Anforderung…"
+              rows={4}
+              style={{
+                width: '100%', 
+                background: 'var(--bg-subtle)', 
+                border: '1px solid var(--border-input)', 
+                borderRadius: '10px', 
+                padding: '10px 13px', 
+                fontSize: '13.5px', 
+                color: 'var(--ink)', 
+                outline: 'none',
+                resize: 'vertical',
+                lineHeight: 1.5
+              }}
+              required
+            />
+          </div>
+
+          {/* Category & Priority Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div>
+              <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '6px' }}>Kategorie</div>
+              <select 
+                value={category}
+                onChange={(e) => setCategory(e.target.value as Ticket['category'])}
+                style={{
+                  width: '100%', 
+                  background: 'var(--bg-subtle)', 
+                  border: '1px solid var(--border-input)', 
+                  borderRadius: '10px', 
+                  padding: '10px 11px', 
+                  fontSize: '13.5px', 
+                  color: 'var(--ink)', 
+                  outline: 'none'
+                }}
+              >
+                <option value="Hardware">Hardware</option>
+                <option value="Software">Software</option>
+                <option value="Netzwerk">Network</option>
+                <option value="Berechtigungen">Permissions</option>
+              </select>
             </div>
 
-            {/* View filter tabs */}
-            <div style={{ display: 'flex', gap: '4px', backgroundColor: 'var(--border-light)', padding: '3px', borderRadius: '8px', marginLeft: 'auto' }}>
-              {(['all', 'open', 'in_progress', 'resolved'] as const).map(tab => (
+            <div>
+              <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '6px' }}>Priorität</div>
+              <select 
+                value={priority}
+                onChange={(e) => setPriority(e.target.value as Ticket['priority'])}
+                style={{
+                  width: '100%', 
+                  background: 'var(--bg-subtle)', 
+                  border: '1px solid var(--border-input)', 
+                  borderRadius: '10px', 
+                  padding: '10px 11px', 
+                  fontSize: '13.5px', 
+                  color: 'var(--ink)', 
+                  outline: 'none'
+                }}
+              >
+                <option value="low">Niedrig</option>
+                <option value="medium">Mittel</option>
+                <option value="high">Hoch</option>
+                <option value="urgent">Dringend</option>
+              </select>
+            </div>
+          </div>
+
+          {/* SLA Time */}
+          <div>
+            <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '6px' }}>SLA-Lösungszeit (Stunden)</div>
+            <input 
+              type="number" 
+              className="form-control" 
+              value={slaHours}
+              onChange={(e) => setSlaHours(Number(e.target.value))}
+              min={1}
+              style={{
+                width: '100%', 
+                background: 'var(--bg-subtle)', 
+                border: '1px solid var(--border-input)', 
+                borderRadius: '10px', 
+                padding: '10px 13px', 
+                fontSize: '13.5px', 
+                color: 'var(--ink)', 
+                outline: 'none'
+              }}
+              required
+            />
+          </div>
+
+          <button 
+            type="submit" 
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: '8px', 
+              background: 'var(--primary-btn)', 
+              color: '#fff', 
+              border: 'none', 
+              borderRadius: '11px', 
+              padding: '12px', 
+              fontFamily: 'Plus Jakarta Sans', 
+              fontSize: '13.5px', 
+              fontWeight: 600, 
+              cursor: 'pointer', 
+              boxShadow: 'var(--btn-shadow)', 
+              marginTop: '2px' 
+            }}
+            className="hover-btn-primary"
+          >
+            <Send size={15} strokeWidth={1.9} />
+            <span>Ticket einreichen</span>
+          </button>
+        </form>
+
+        {/* Mascot Card */}
+        <div style={{
+          marginTop: '24px',
+          padding: '16px',
+          background: 'rgba(255, 255, 255, 0.03)',
+          border: '1px dashed var(--border)',
+          borderRadius: '14px',
+          display: 'flex',
+          gap: '12px',
+          alignItems: 'center'
+        }}>
+          <img 
+            src="/kitten_logo.png" 
+            alt="PISHI Mascot" 
+            style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              objectFit: 'cover',
+              border: '2px solid var(--primary)',
+              flexShrink: 0
+            }}
+          />
+          <div>
+            <div style={{ fontFamily: 'Space Grotesk', fontSize: '13px', fontWeight: 600, color: 'var(--ink)' }}>
+              Hallo, ich bin Pishi! 🐾
+            </div>
+            <div style={{ fontSize: '11.5px', color: 'var(--muted)', marginTop: '4px', lineHeight: 1.4 }}>
+              Dein IT-Support-Kätzchen. Ich helfe dir, Tickets im Auge zu behalten und sie in Aufgaben zu verwandeln!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Column: Tickets List */}
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        
+        {/* Header Toolbar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ display: 'flex', background: 'var(--well)', borderRadius: '11px', padding: '3px', gap: '2px' }}>
+            {(['all', 'open', 'in_progress', 'resolved'] as const).map(tab => {
+              const isActive = activeTab === tab;
+              return (
                 <button
                   key={tab}
                   type="button"
                   onClick={() => setActiveTab(tab)}
                   style={{
-                    padding: '6px 12px',
-                    fontSize: '0.8rem',
-                    fontWeight: activeTab === tab ? 700 : 500,
                     border: 'none',
-                    borderRadius: '6px',
+                    background: isActive ? 'var(--bg-card)' : 'transparent',
+                    boxShadow: isActive ? 'var(--shadow-card)' : 'none',
+                    borderRadius: '9px',
+                    padding: '7px 14px',
+                    fontFamily: 'Plus Jakarta Sans',
+                    fontSize: '12.5px',
+                    fontWeight: isActive ? 700 : 600,
+                    color: isActive ? 'var(--ink)' : 'var(--ink-3)',
                     cursor: 'pointer',
-                    color: activeTab === tab ? 'white' : 'var(--text-secondary)',
-                    backgroundColor: activeTab === tab ? 'var(--primary)' : 'transparent',
                     transition: 'all var(--transition-fast)'
                   }}
                 >
@@ -287,211 +396,375 @@ export const SupportView: React.FC<SupportViewProps> = ({
                   {tab === 'in_progress' && 'In Arbeit'}
                   {tab === 'resolved' && 'Gelöst'}
                 </button>
-              ))}
-            </div>
+              );
+            })}
+          </div>
+          
+          {/* Search Input inside list header */}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px', 
+            background: 'var(--bg-card)', 
+            border: '1px solid var(--border-input)', 
+            borderRadius: '10px', 
+            padding: '6px 12px', 
+            maxWidth: '220px', 
+            flex: 1 
+          }}>
+            <Laptop size={13} color="var(--muted)" />
+            <input 
+              type="text" 
+              placeholder="Suchen..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ 
+                border: 'none', 
+                background: 'transparent', 
+                outline: 'none', 
+                fontSize: '12px', 
+                width: '100%', 
+                color: 'var(--ink)' 
+              }}
+            />
           </div>
 
-          {/* Tickets List */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {filteredTickets.map(ticket => {
-              const sla = getSlaDetails(ticket);
-              const isConverting = convertingTicketId === ticket.id;
+          <span style={{ marginLeft: 'auto', fontSize: '12.5px', fontWeight: 500, color: 'var(--muted)' }}>
+            {filteredTickets.length} Tickets · {filteredTickets.filter(t => t.status !== 'resolved').length} offen
+          </span>
+        </div>
 
-              return (
-                <div 
-                  key={ticket.id}
-                  className="card"
-                  style={{ 
-                    padding: '16px 20px', 
-                    borderLeft: `4px solid ${getCategoryColor(ticket.category)}`,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px',
-                    position: 'relative'
-                  }}
-                >
-                  {/* Top: Header metadata */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)' }}>#{ticket.id}</span>
-                      <span 
-                        className="badge" 
+        {/* Tickets List */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {filteredTickets.map(ticket => {
+            const sla = getSlaDetails(ticket);
+            const isConverting = convertingTicketId === ticket.id;
+            const { name, dept } = parseReporter(ticket.reporter);
+
+            return (
+              <div 
+                key={ticket.id}
+                style={{ 
+                  background: 'var(--bg-card)', 
+                  border: '1px solid var(--border)', 
+                  borderRadius: '16px', 
+                  padding: '20px 22px', 
+                  boxShadow: 'var(--shadow-card)',
+                  opacity: ticket.status === 'resolved' ? 0.7 : 1,
+                  transition: 'box-shadow var(--transition-fast)'
+                }}
+                className="hover-card"
+              >
+                {/* Top: Header metadata */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontFamily: 'Space Grotesk', fontSize: '12.5px', fontWeight: 600, color: 'var(--muted)' }}>
+                    #{ticket.id}
+                  </span>
+                  <span style={{ 
+                    fontSize: '10px', 
+                    fontWeight: 700, 
+                    letterSpacing: '.05em', 
+                    color: 'var(--ink-3)', 
+                    background: 'var(--chip)', 
+                    padding: '4px 9px', 
+                    borderRadius: '7px',
+                    textTransform: 'uppercase'
+                  }}>
+                    {ticket.category === 'Berechtigungen' ? 'BERECHTIGUNGEN' : ticket.category.toUpperCase()}
+                  </span>
+                  <span style={{ 
+                    fontSize: '10px', 
+                    fontWeight: 700, 
+                    letterSpacing: '.05em', 
+                    color: ticket.priority === 'urgent' || ticket.priority === 'high' ? 'var(--red)' : ticket.priority === 'medium' ? 'var(--primary)' : 'var(--ink-3)', 
+                    background: ticket.priority === 'urgent' || ticket.priority === 'high' ? 'var(--red-tint)' : ticket.priority === 'medium' ? 'var(--primary-tint)' : 'var(--chip)', 
+                    padding: '4px 9px', 
+                    borderRadius: '7px' 
+                  }}>
+                    {ticket.priority === 'urgent' ? 'DRINGEND' : ticket.priority.toUpperCase()}
+                  </span>
+                  {ticket.status === 'in_progress' && (
+                    <span style={{ 
+                      fontSize: '10px', 
+                      fontWeight: 700, 
+                      letterSpacing: '.05em', 
+                      color: 'var(--primary)', 
+                      background: 'var(--primary-tint)', 
+                      padding: '4px 9px', 
+                      borderRadius: '7px' 
+                    }}>
+                      IN ARBEIT
+                    </span>
+                  )}
+
+                  <span style={{ 
+                    marginLeft: 'auto', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '6px', 
+                    fontSize: '11.5px', 
+                    fontWeight: 700, 
+                    color: sla.color, 
+                    background: sla.bg, 
+                    padding: '5px 11px', 
+                    borderRadius: '999px' 
+                  }}>
+                    {ticket.status === 'resolved' ? (
+                      <CheckCircle size={13} strokeWidth={2.2} />
+                    ) : (
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><polyline points="12,7 12,12 16,14"/></svg>
+                    )}
+                    {sla.text}
+                  </span>
+                </div>
+
+                {/* Middle: Title & description */}
+                <div>
+                  <h4 style={{ 
+                    fontSize: '15px', 
+                    fontWeight: 650, 
+                    color: 'var(--ink)', 
+                    margin: '10px 0 4px', 
+                    letterSpacing: '-.005em',
+                    textDecoration: ticket.status === 'resolved' ? 'line-through' : 'none',
+                    textDecorationColor: 'var(--faint)',
+                    textDecorationThickness: '1px'
+                  }}>
+                    {ticket.title}
+                  </h4>
+                  <p style={{ fontSize: '13px', color: 'var(--ink-3)', lineHeight: '1.5', maxWidth: '72ch', margin: 0 }}>
+                    {ticket.description}
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', fontSize: '12px', color: 'var(--muted)', fontWeight: 500 }}>
+                    <User size={13} strokeWidth={1.8} />
+                    <span style={{ color: 'var(--ink-2)', fontWeight: 600 }}>{name}</span> {dept && `· ${dept}`}
+                    <span style={{ color: 'var(--faint)' }}>•</span>
+                    Erstellt: {new Date(ticket.createdAt).toLocaleDateString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </div>
+
+                {/* Bottom: Action buttons or inline conversion panel */}
+                {ticket.status !== 'resolved' && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '14px', paddingTop: '14px', borderTop: '1px solid var(--border-soft)' }}>
+                    {ticket.status === 'open' && (
+                      <button 
                         style={{ 
-                          backgroundColor: `${getCategoryColor(ticket.category)}20`, 
-                          color: getCategoryColor(ticket.category), 
-                          fontSize: '0.65rem',
-                          padding: '2px 8px'
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '6px', 
+                          background: 'var(--bg-card)', 
+                          border: '1px solid var(--border-input)', 
+                          borderRadius: '9px', 
+                          padding: '8px 14px', 
+                          fontFamily: 'Plus Jakarta Sans', 
+                          fontSize: '12.5px', 
+                          fontWeight: 600, 
+                          color: 'var(--ink-2)', 
+                          cursor: 'pointer' 
                         }}
+                        className="hover-btn-secondary"
+                        onClick={() => onUpdateTicketStatus(ticket.id, 'in_progress')}
                       >
-                        {ticket.category}
-                      </span>
-                      <span className={`badge ${getPriorityBadgeClass(ticket.priority)}`} style={{ fontSize: '0.6rem', padding: '1px 6px' }}>
-                        {ticket.priority.toUpperCase()}
-                      </span>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>SLA:</span>
-                      <span className={`badge ${sla.badgeClass}`} style={{ fontSize: '0.7rem', fontWeight: 700 }}>
-                        {sla.text}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Middle: Title & description */}
-                  <div>
-                    <h4 style={{ margin: 0, fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>{ticket.title}</h4>
-                    <p style={{ margin: '6px 0 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>{ticket.description}</p>
-                    <div style={{ marginTop: '8px', fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <User size={10} />
-                      <span>Melder: <strong>{ticket.reporter}</strong></span>
-                      <span style={{ margin: '0 4px' }}>•</span>
-                      <span>Erstellt: {new Date(ticket.createdAt).toLocaleDateString('de-DE', { hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                  </div>
-
-                  {/* Bottom: Action buttons or inline conversion panel */}
-                  <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                        <Play size={13} strokeWidth={2} />
+                        Annehmen
+                      </button>
+                    )}
                     
-                    {/* Status updater */}
-                    <div style={{ display: 'flex', gap: '6px' }} onClick={(e) => e.stopPropagation()}>
-                      {ticket.status === 'open' && (
-                        <button 
-                          className="btn btn-secondary" 
-                          style={{ padding: '4px 8px', fontSize: '0.75rem', gap: '4px' }}
-                          onClick={() => onUpdateTicketStatus(ticket.id, 'in_progress')}
-                        >
-                          <Play size={10} />
-                          Annehmen
-                        </button>
-                      )}
-                      {ticket.status !== 'resolved' && (
-                        <button 
-                          className="btn btn-secondary" 
-                          style={{ padding: '4px 8px', fontSize: '0.75rem', gap: '4px', color: 'var(--success)', borderColor: 'var(--success)' }}
-                          onClick={() => onUpdateTicketStatus(ticket.id, 'resolved')}
-                        >
-                          <CheckCircle size={10} />
-                          Lösen
-                        </button>
-                      )}
-                    </div>
+                    <button 
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '6px', 
+                        background: 'var(--green-tint)', 
+                        border: 'none', 
+                        borderRadius: '9px', 
+                        padding: '8px 14px', 
+                        fontFamily: 'Plus Jakarta Sans', 
+                        fontSize: '12.5px', 
+                        fontWeight: 700, 
+                        color: 'var(--green)', 
+                        cursor: 'pointer' 
+                      }}
+                      className="hover-opacity"
+                      onClick={() => onUpdateTicketStatus(ticket.id, 'resolved')}
+                    >
+                      <CheckCircle size={13} strokeWidth={2.2} />
+                      Lösen
+                    </button>
 
-                    {/* Convert Button */}
-                    {ticket.status !== 'resolved' && !isConverting && (
-                      <button
-                        className="btn btn-primary"
-                        style={{ padding: '5px 10px', fontSize: '0.75rem', gap: '4px', backgroundColor: 'var(--primary)' }}
+                    {!isConverting && (
+                      <button 
+                        style={{ 
+                          marginLeft: 'auto', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '7px', 
+                          background: 'var(--primary-btn)', 
+                          color: '#fff', 
+                          border: 'none', 
+                          borderRadius: '9px', 
+                          padding: '8px 15px', 
+                          fontFamily: 'Plus Jakarta Sans', 
+                          fontSize: '12.5px', 
+                          fontWeight: 700, 
+                          cursor: 'pointer' 
+                        }}
+                        className="hover-btn-primary"
                         onClick={() => handleStartConversion(ticket.id)}
                       >
-                        <UserPlus size={10} />
-                        <span>In Aufgabe umwandeln</span>
-                        <ArrowRight size={10} />
+                        In Aufgabe umwandeln
+                        <ArrowRight size={13} strokeWidth={2.2} style={{ marginLeft: '4px' }} />
                       </button>
                     )}
                   </div>
+                )}
 
-                  {/* Inline Task Conversion Panel */}
-                  {isConverting && (
-                    <div 
-                      style={{ 
-                        marginTop: '8px', 
-                        padding: '12px', 
-                        backgroundColor: 'var(--border-light)', 
-                        borderRadius: 'var(--radius-sm)', 
-                        border: '1px solid var(--border-color)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '10px',
-                        animation: 'fadeIn var(--transition-fast)',
-                        zIndex: 10
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <strong style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Aufgaben-Parameter festlegen</strong>
-                        <button 
-                          style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-                          onClick={() => setConvertingTicketId(null)}
+                {/* Inline Task Conversion Panel */}
+                {isConverting && (
+                  <div 
+                    style={{ 
+                      marginTop: '14px', 
+                      padding: '16px', 
+                      backgroundColor: 'var(--bg-subtle)', 
+                      borderRadius: '12px', 
+                      border: '1px solid var(--border)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px',
+                      animation: 'fadeIn var(--transition-fast)',
+                      zIndex: 10
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <strong style={{ fontSize: '12px', fontFamily: 'Space Grotesk', textTransform: 'uppercase', color: 'var(--ink-2)', letterSpacing: '.05em' }}>Aufgaben-Parameter festlegen</strong>
+                      <button 
+                        style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                        onClick={() => setConvertingTicketId(null)}
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '12px' }}>
+                      {/* Target Workspace */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em' }}>IT-Projekt</span>
+                        <select 
+                          style={{ 
+                            padding: '8px 10px', 
+                            fontSize: '12.5px',
+                            background: 'var(--bg-card)',
+                            border: '1px solid var(--border-input)',
+                            borderRadius: '8px',
+                            color: 'var(--ink)',
+                            outline: 'none'
+                          }}
+                          value={targetWorkspaceId}
+                          onChange={(e) => setTargetWorkspaceId(e.target.value)}
                         >
-                          <X size={14} />
-                        </button>
+                          {workspaces.map(ws => (
+                            <option key={ws.id} value={ws.id}>{ws.name}</option>
+                          ))}
+                        </select>
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '10px' }}>
-                        {/* Target Workspace */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)' }}>IT-Projekt</span>
-                          <select 
-                            className="form-control" 
-                            style={{ padding: '4px 8px', fontSize: '0.75rem' }}
-                            value={targetWorkspaceId}
-                            onChange={(e) => setTargetWorkspaceId(e.target.value)}
-                          >
-                            {workspaces.map(ws => (
-                              <option key={ws.id} value={ws.id}>{ws.name}</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* Assignee */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)' }}>Zuweisen an</span>
-                          <select 
-                            className="form-control" 
-                            style={{ padding: '4px 8px', fontSize: '0.75rem' }}
-                            value={targetAssigneeId}
-                            onChange={(e) => setTargetAssigneeId(e.target.value)}
-                          >
-                            {users.map(u => (
-                              <option key={u.id} value={u.id}>{u.name}</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* Due Date */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)' }}>Fälligkeit</span>
-                          <input 
-                            type="date"
-                            className="form-control"
-                            style={{ padding: '4px 8px', fontSize: '0.75rem' }}
-                            value={targetDueDate}
-                            onChange={(e) => setTargetDueDate(e.target.value)}
-                          />
-                        </div>
+                      {/* Assignee */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em' }}>Zuweisen an</span>
+                        <select 
+                          style={{ 
+                            padding: '8px 10px', 
+                            fontSize: '12.5px',
+                            background: 'var(--bg-card)',
+                            border: '1px solid var(--border-input)',
+                            borderRadius: '8px',
+                            color: 'var(--ink)',
+                            outline: 'none'
+                          }}
+                          value={targetAssigneeId}
+                          onChange={(e) => setTargetAssigneeId(e.target.value)}
+                        >
+                          {users.map(u => (
+                            <option key={u.id} value={u.id}>{u.name}</option>
+                          ))}
+                        </select>
                       </div>
 
-                      <div style={{ display: 'flex', gap: '10px', alignSelf: 'flex-end', marginTop: '4px' }}>
-                        <button 
-                          className="btn btn-secondary" 
-                          style={{ padding: '4px 10px', fontSize: '0.75rem' }}
-                          onClick={() => setConvertingTicketId(null)}
-                        >
-                          Abbrechen
-                        </button>
-                        <button 
-                          className="btn btn-primary" 
-                          style={{ padding: '4px 12px', fontSize: '0.75rem', backgroundColor: 'var(--success)' }}
-                          onClick={handleConfirmConversion}
-                        >
-                          Übernehmen & Erstellen
-                        </button>
+                      {/* Due Date */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em' }}>Fälligkeit</span>
+                        <input 
+                          type="date"
+                          style={{ 
+                            padding: '8px 10px', 
+                            fontSize: '12.5px',
+                            background: 'var(--bg-card)',
+                            border: '1px solid var(--border-input)',
+                            borderRadius: '8px',
+                            color: 'var(--ink)',
+                            outline: 'none'
+                          }}
+                          value={targetDueDate}
+                          onChange={(e) => setTargetDueDate(e.target.value)}
+                        />
                       </div>
                     </div>
-                  )}
 
-                </div>
-              );
-            })}
+                    <div style={{ display: 'flex', gap: '10px', alignSelf: 'flex-end', marginTop: '4px' }}>
+                      <button 
+                        style={{ 
+                          padding: '8px 14px', 
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          background: 'var(--bg-card)',
+                          border: '1px solid var(--border-input)',
+                          borderRadius: '8px',
+                          color: 'var(--ink-2)',
+                          cursor: 'pointer'
+                        }}
+                        className="hover-btn-secondary"
+                        onClick={() => setConvertingTicketId(null)}
+                      >
+                        Abbrechen
+                      </button>
+                      <button 
+                        style={{ 
+                          padding: '8px 16px', 
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          background: 'var(--green)',
+                          border: 'none',
+                          borderRadius: '8px',
+                          color: '#fff',
+                          cursor: 'pointer'
+                        }}
+                        className="hover-opacity"
+                        onClick={handleConfirmConversion}
+                      >
+                        Übernehmen &amp; Erstellen
+                      </button>
+                    </div>
+                  </div>
+                )}
 
-            {filteredTickets.length === 0 && (
-              <div className="card" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                📭 Keine Tickets in dieser Kategorie vorhanden.
               </div>
-            )}
-          </div>
+            );
+          })}
 
+          {filteredTickets.length === 0 && (
+            <div style={{ 
+              background: 'var(--bg-card)', 
+              border: '1px solid var(--border)', 
+              borderRadius: '16px', 
+              padding: '32px', 
+              textAlign: 'center', 
+              color: 'var(--muted)', 
+              fontSize: '0.85rem' 
+            }}>
+              📭 Keine Tickets in dieser Kategorie vorhanden.
+            </div>
+          )}
         </div>
 
       </div>

@@ -1,6 +1,6 @@
-# 🏢 KoWoPlanner - IT-Projektplaner & Helpdesk
+# 🏢 PISHI-Project-and-Incident-Scheduling-Helper-for-IT-Departments Public
 
-KoWoPlanner ist ein moderner, interaktiver Prototyp für ein webbasiertes Projektmanagement- und Helpdesk-System, das speziell auf die Bedürfnisse der IT-Abteilung zugeschnitten ist. Die Anwendung kombiniert ein leistungsfähiges Aufgabenmanagement mit einem direkten Support-Ticket-Kanal, um eingehende Meldungen reibungslos in aktive IT-Projekte einzuplanen.
+PISHI ist ein moderner, interaktiver Prototyp für ein webbasiertes Projektmanagement- und Helpdesk-System, das speziell auf die Bedürfnisse der IT-Abteilung zugeschnitten ist. Die Anwendung kombiniert ein leistungsfähiges Aufgabenmanagement mit einem direkten Support-Ticket-Kanal, um eingehende Meldungen reibungslos in aktive IT-Projekte einzuplanen.
 
 ---
 

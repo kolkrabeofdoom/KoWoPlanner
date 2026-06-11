@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, SlidersHorizontal } from 'lucide-react';
+import { Plus, SlidersHorizontal, ChevronDown } from 'lucide-react';
 import type { Task, User } from '../data/mockData';
 import { TaskCard } from '../components/TaskCard';
 
@@ -20,11 +20,8 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
   onUpdateTaskStatus,
   searchTerm
 }) => {
-  // Filter states
   const [filterPriority, setFilterPriority] = useState<string>('all');
   const [filterAssignee, setFilterAssignee] = useState<string>('all');
-
-  // Drag-over hover state for column coloring
   const [draggedOverColumn, setDraggedOverColumn] = useState<Task['status'] | null>(null);
 
   // Apply filters
@@ -38,10 +35,10 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
     return matchesSearch && matchesPriority && matchesAssignee;
   });
 
-  const columns: { id: Task['status']; title: string }[] = [
-    { id: 'planning', title: 'In Planung' },
-    { id: 'in_progress', title: 'In Bearbeitung' },
-    { id: 'completed', title: 'Erledigt' }
+  const columns: { id: Task['status']; title: string; color: string }[] = [
+    { id: 'planning', title: 'In Planung', color: 'var(--gold)' },
+    { id: 'in_progress', title: 'In Bearbeitung', color: 'var(--primary)' },
+    { id: 'completed', title: 'Erledigt', color: 'var(--green)' }
   ];
 
   // Drag events
@@ -66,22 +63,31 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
   };
 
   return (
-    <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '18px', flex: 1 }}>
       
-      {/* Header bar with filters and statistics */}
-      <div className="board-header-bar">
-        
-        {/* Filters */}
-        <div className="filters-wrapper">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-            <SlidersHorizontal size={14} />
-            <span>Filter:</span>
-          </div>
+      {/* Toolbar from Mockup */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 600, color: 'var(--ink-3)' }}>
+          <SlidersHorizontal size={16} strokeWidth={1.8} />
+          <span>Filter</span>
+        </div>
 
-          {/* Priority Filter */}
+        {/* Priority Filter Wrapper */}
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
           <select 
-            className="form-control" 
-            style={{ padding: '6px 12px', fontSize: '0.85rem', minWidth: '130px' }}
+            style={{ 
+              appearance: 'none',
+              background: 'var(--bg-card)', 
+              border: '1px solid var(--border-input)', 
+              borderRadius: '10px', 
+              padding: '9px 34px 9px 14px', 
+              fontFamily: 'inherit', 
+              fontSize: '13px', 
+              fontWeight: 600, 
+              color: 'var(--ink-2)', 
+              cursor: 'pointer',
+              outline: 'none'
+            }}
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value)}
           >
@@ -91,29 +97,43 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
             <option value="high">Priorität: Hoch</option>
             <option value="urgent">Priorität: Dringend</option>
           </select>
+          <ChevronDown size={14} style={{ position: 'absolute', right: '12px', pointerEvents: 'none', color: 'var(--ink-3)' }} />
+        </div>
 
-          {/* Assignee Filter */}
+        {/* Assignee Filter Wrapper */}
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
           <select 
-            className="form-control" 
-            style={{ padding: '6px 12px', fontSize: '0.85rem', minWidth: '150px' }}
+            style={{ 
+              appearance: 'none',
+              background: 'var(--bg-card)', 
+              border: '1px solid var(--border-input)', 
+              borderRadius: '10px', 
+              padding: '9px 34px 9px 14px', 
+              fontFamily: 'inherit', 
+              fontSize: '13px', 
+              fontWeight: 600, 
+              color: 'var(--ink-2)', 
+              cursor: 'pointer',
+              outline: 'none'
+            }}
             value={filterAssignee}
             onChange={(e) => setFilterAssignee(e.target.value)}
           >
             <option value="all">Alle Mitarbeiter</option>
             {users.map(u => (
-              <option key={u.id} value={u.id}>Mitarbeiter: {u.name}</option>
+              <option key={u.id} value={u.id}>{u.name}</option>
             ))}
           </select>
+          <ChevronDown size={14} style={{ position: 'absolute', right: '12px', pointerEvents: 'none', color: 'var(--ink-3)' }} />
         </div>
 
-        {/* Board Stats Summary */}
-        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
-          Angezeigt: <strong style={{ color: 'var(--text-primary)' }}>{filteredTasks.length}</strong> von {tasks.length} Aufgaben
-        </div>
+        <span style={{ marginLeft: 'auto', fontSize: '12.5px', fontWeight: 500, color: 'var(--muted)' }}>
+          {filteredTasks.length} von {tasks.length} Aufgaben angezeigt
+        </span>
       </div>
 
-      {/* Kanban Board Container */}
-      <div className="board-container">
+      {/* Board Columns Grid from Mockup */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '18px', alignItems: 'start', flex: 1 }}>
         {columns.map((col) => {
           const colTasks = filteredTasks.filter(t => t.status === col.id);
           const isDragHover = draggedOverColumn === col.id;
@@ -121,29 +141,55 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
           return (
             <div 
               key={col.id} 
-              className={`kanban-column ${isDragHover ? 'drag-hover' : ''}`}
               onDragOver={(e) => handleDragOver(e, col.id)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, col.id)}
+              style={{
+                background: isDragHover ? 'var(--bg-hover)' : 'var(--well)',
+                borderRadius: '16px',
+                padding: '12px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                minHeight: '450px',
+                border: isDragHover ? '1.5px dashed var(--primary)' : '1.5px solid transparent',
+                transition: 'background var(--transition-fast), border var(--transition-fast)'
+              }}
             >
-              {/* Column Header */}
-              <div className="column-header">
-                <div className="column-title-wrapper">
-                  <span className="column-title">{col.title}</span>
-                  <span className="column-counter">{colTasks.length}</span>
-                </div>
+              {/* Column Header from Mockup */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '9px', padding: '4px 8px' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: col.color, flex: 'none' }}></span>
+                <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--ink-2)' }}>
+                  {col.title}
+                </span>
+                <span style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--ink-3)', background: 'var(--chip)', borderRadius: '999px', padding: '1px 8px' }}>
+                  {colTasks.length}
+                </span>
                 <button 
-                  className="theme-toggle-btn" 
-                  style={{ padding: '4px', borderRadius: '4px' }}
                   onClick={() => onAddTask(col.id)}
-                  title="Aufgabe in dieser Spalte erstellen"
+                  style={{ 
+                    marginLeft: 'auto', 
+                    width: '26px', 
+                    height: '26px', 
+                    borderRadius: '8px', 
+                    border: 'none', 
+                    background: 'transparent', 
+                    color: 'var(--muted)', 
+                    cursor: 'pointer', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    transition: 'background var(--transition-fast)'
+                  }}
+                  className="hover-btn-icon"
+                  title="Aufgabe erstellen"
                 >
-                  <Plus size={16} />
+                  <Plus size={15} strokeWidth={2} />
                 </button>
               </div>
 
-              {/* Column Tasks */}
-              <div className="column-cards">
+              {/* Task Cards List */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {colTasks.length === 0 ? (
                   <div style={{ 
                     display: 'flex', 
@@ -151,16 +197,16 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                     alignItems: 'center', 
                     justifyContent: 'center',
                     padding: '32px 16px',
-                    border: '1px dashed var(--border-color)',
-                    borderRadius: 'var(--radius-md)',
-                    color: 'var(--text-muted)',
-                    fontSize: '0.8rem',
+                    border: '1.5px dashed var(--border-input)',
+                    borderRadius: '14px',
+                    color: 'var(--muted)',
+                    fontSize: '12px',
                     textAlign: 'center',
-                    backgroundColor: 'rgba(255,255,255,0.01)',
+                    backgroundColor: 'transparent',
                     marginTop: '4px'
                   }}>
                     Keine Aufgaben
-                    <span style={{ fontSize: '0.7rem', marginTop: '4px' }}>Ziehen Sie eine Aufgabe hierher</span>
+                    <span style={{ fontSize: '11px', marginTop: '4px', opacity: 0.7 }}>Ziehen Sie eine Aufgabe hierher</span>
                   </div>
                 ) : (
                   colTasks.map(task => (
@@ -174,11 +220,35 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                 )}
               </div>
 
+              {/* Quick Add Button at the bottom */}
+              <button 
+                onClick={() => onAddTask(col.id)}
+                style={{ 
+                  border: '1.5px dashed var(--border-input)', 
+                  background: 'transparent', 
+                  borderRadius: '12px', 
+                  padding: '11px', 
+                  fontFamily: 'inherit', 
+                  fontSize: '12.5px', 
+                  fontWeight: 600, 
+                  color: 'var(--muted)', 
+                  cursor: 'pointer', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  gap: '7px',
+                  transition: 'background var(--transition-fast), color var(--transition-fast)'
+                }}
+                className="hover-btn-icon"
+              >
+                <Plus size={14} strokeWidth={2.2} />
+                Aufgabe hinzufügen
+              </button>
             </div>
           );
         })}
       </div>
-
     </div>
   );
 };
+

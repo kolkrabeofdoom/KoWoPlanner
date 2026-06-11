@@ -13,7 +13,7 @@ export const api = axios.create({
 // Interceptor to attach JWT token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('kowoplanner_token');
+    const token = localStorage.getItem('pishi_token');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -34,7 +34,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('kowoplanner_token');
+      localStorage.removeItem('pishi_token');
       if (onUnauthorized) onUnauthorized();
     }
     return Promise.reject(error);

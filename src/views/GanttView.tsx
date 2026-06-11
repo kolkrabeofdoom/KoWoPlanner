@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SlidersHorizontal, Monitor } from 'lucide-react';
+import { SlidersHorizontal, Monitor, Check } from 'lucide-react';
 import type { Task, User } from '../data/mockData';
 
 interface GanttViewProps {
@@ -46,284 +46,311 @@ export const GanttView: React.FC<GanttViewProps> = ({
     return matchesPriority && matchesAssignee;
   });
 
-  const getPriorityColor = (priority: Task['priority']) => {
-    switch (priority) {
-      case 'urgent': return 'var(--danger)';
-      case 'high': return 'var(--danger)';
-      case 'medium': return 'var(--warning)';
-      case 'low': return 'var(--info)';
-      default: return 'var(--primary)';
-    }
-  };
-
   const getPriorityText = (priority: Task['priority']) => {
     switch (priority) {
-      case 'urgent': return 'Dringend';
-      case 'high': return 'Hoch';
-      case 'medium': return 'Mittel';
-      case 'low': return 'Niedrig';
-      default: return priority;
+      case 'urgent': return 'URGENT';
+      case 'high': return 'HIGH';
+      case 'medium': return 'MEDIUM';
+      case 'low': return 'LOW';
+      default: return '';
     }
   };
 
   return (
-    <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       
-      {/* Filter toolbar */}
-      <div className="board-header-bar">
-        <div className="filters-wrapper">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-            <SlidersHorizontal size={14} />
-            <span>Filter:</span>
-          </div>
-
-          {/* Priority filter */}
+      {/* Filters Toolbar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        
+        {/* Priority Filter */}
+        <div style={{ position: 'relative' }}>
           <select 
-            className="form-control" 
-            style={{ padding: '6px 12px', fontSize: '0.85rem', minWidth: '130px' }}
+            style={{
+              appearance: 'none',
+              WebkitAppearance: 'none',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-input)',
+              borderRadius: '10px',
+              padding: '9px 34px 9px 14px',
+              fontFamily: 'var(--font-sans)',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: 'var(--ink-2)',
+              cursor: 'pointer',
+              outline: 'none',
+            }}
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value)}
           >
-            <option value="all">Alle Prioritäten</option>
+            <option value="all">Priorität: Alle</option>
             <option value="low">Priorität: Niedrig</option>
             <option value="medium">Priorität: Mittel</option>
             <option value="high">Priorität: Hoch</option>
             <option value="urgent">Priorität: Dringend</option>
           </select>
+          <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--ink-3)' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6,9 12,15 18,9"/></svg>
+          </div>
+        </div>
 
-          {/* Assignee filter */}
+        {/* Assignee Filter */}
+        <div style={{ position: 'relative' }}>
           <select 
-            className="form-control" 
-            style={{ padding: '6px 12px', fontSize: '0.85rem', minWidth: '150px' }}
+            style={{
+              appearance: 'none',
+              WebkitAppearance: 'none',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-input)',
+              borderRadius: '10px',
+              padding: '9px 34px 9px 14px',
+              fontFamily: 'var(--font-sans)',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: 'var(--ink-2)',
+              cursor: 'pointer',
+              outline: 'none',
+            }}
             value={filterAssignee}
             onChange={(e) => setFilterAssignee(e.target.value)}
           >
-            <option value="all">Alle Mitarbeiter</option>
+            <option value="all">Mitarbeiter: Alle</option>
             {users.map(u => (
               <option key={u.id} value={u.id}>Mitarbeiter: {u.name}</option>
             ))}
           </select>
+          <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--ink-3)' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6,9 12,15 18,9"/></svg>
+          </div>
         </div>
 
-        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
-          Angezeigt: <strong style={{ color: 'var(--text-primary)' }}>{filteredTasks.length}</strong> von {tasks.length} Aufgaben
+        <div style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--primary)', background: 'var(--primary-tint)', padding: '4px 11px', borderRadius: '999px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary)' }} />
+          Heute: 11. Juni
+        </div>
+
+        {/* Legend */}
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '14px', fontSize: '11.5px', fontWeight: 600, color: 'var(--ink-3)' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ width: '14px', height: '7px', borderRadius: '999px', background: 'var(--gold)' }}></span>In Planung
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ width: '14px', height: '7px', borderRadius: '999px', background: 'var(--primary)' }}></span>In Bearbeitung
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ width: '14px', height: '7px', borderRadius: '999px', background: 'var(--green)' }}></span>Erledigt
+          </span>
         </div>
       </div>
 
-      {/* Gantt Container Card */}
-      <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      {/* Gantt Timeline Card */}
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '18px', padding: '20px 24px', boxShadow: 'var(--shadow-card)', overflowX: 'auto' }}>
         
-        {/* Split layout container */}
-        <div style={{ display: 'flex', minWidth: '100%', overflowX: 'auto' }}>
+        {/* Day Header Row */}
+        <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', alignItems: 'end', paddingBottom: '10px', borderBottom: '1px solid var(--border-soft)', minWidth: '1150px' }}>
+          <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+            Aufgabe
+          </div>
           
-          {/* Left: Task Titles Fixed Side */}
-          <div style={{ 
-            width: '280px', 
-            flexShrink: 0, 
-            borderRight: '1px solid var(--border-color)', 
-            backgroundColor: 'var(--bg-card)',
-            zIndex: 10
-          }}>
-            {/* Header Cell */}
-            <div style={{ 
-              height: '48px', 
-              padding: '12px 16px', 
-              borderBottom: '1px solid var(--border-color)', 
-              fontWeight: 700,
-              fontSize: '0.85rem',
-              color: 'var(--text-muted)',
-              display: 'flex',
-              alignItems: 'center'
-            }}>
-              IT-Aufgabe / System
-            </div>
-
-            {/* Task rows */}
-            {filteredTasks.map(task => {
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(30, 1fr)' }}>
+            {daysArray.map(day => {
+              const isWeekend = [6, 7, 13, 14, 20, 21, 27, 28].includes(day); // June weekends
+              if (day === 11) {
+                return (
+                  <span key={day} style={{ display: 'flex', justifyContent: 'center' }}>
+                    <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'var(--primary-btn)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700, fontFamily: 'Space Grotesk' }}>
+                      11
+                    </span>
+                  </span>
+                );
+              }
               return (
-                <div 
-                  key={task.id}
-                  onClick={() => onSelectTask(task)}
-                  className="gantt-row-title-cell"
-                  style={{
-                    height: '60px',
-                    padding: '10px 16px',
-                    borderBottom: '1px solid var(--border-light)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    transition: 'background-color var(--transition-fast)'
+                <span 
+                  key={day} 
+                  style={{ 
+                    textAlign: 'center', 
+                    fontSize: '10px', 
+                    fontWeight: 600, 
+                    color: isWeekend ? 'var(--faint)' : 'var(--ink-3)', 
+                    fontVariantNumeric: 'tabular-nums' 
                   }}
                 >
-                  <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {task.title}
-                  </span>
-                  
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                    <span className={`badge badge-${task.priority === 'urgent' ? 'danger' : task.priority === 'high' ? 'danger' : task.priority === 'medium' ? 'warning' : 'info'}`} style={{ fontSize: '0.6rem', padding: '1px 4px' }}>
-                      {getPriorityText(task.priority)}
-                    </span>
-                    {task.address && (
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                        <Monitor size={10} />
-                        {task.address}
-                      </span>
-                    )}
-                  </div>
-                </div>
+                  {day}
+                </span>
               );
             })}
+          </div>
+        </div>
 
-            {filteredTasks.length === 0 && (
-              <div style={{ padding: '24px 16px', fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                Keine Aufgaben
-              </div>
-            )}
+        {/* Rows Wrapper with absolute vertical lines positioning */}
+        <div style={{ position: 'relative', minWidth: '1150px' }}>
+          
+          {/* Vertical Shading overlays (weekends + today marker) */}
+          <div style={{ position: 'absolute', top: 0, bottom: 0, left: '250px', right: 0, pointerEvents: 'none', display: 'flex' }}>
+            {/* Weekends overlay stripes */}
+            <div style={{ position: 'absolute', top: 0, bottom: 0, left: '16.666%', width: '6.667%', background: 'var(--well)' }}></div>
+            <div style={{ position: 'absolute', top: 0, bottom: 0, left: '40%', width: '6.667%', background: 'var(--well)' }}></div>
+            <div style={{ position: 'absolute', top: 0, bottom: 0, left: '63.333%', width: '6.667%', background: 'var(--well)' }}></div>
+            <div style={{ position: 'absolute', top: 0, bottom: 0, left: '86.666%', width: '6.667%', background: 'var(--well)' }}></div>
+            
+            {/* Today vertical line */}
+            <div style={{ position: 'absolute', top: 0, bottom: 0, left: '35%', width: '2px', background: 'var(--primary)', opacity: 0.65 }}></div>
           </div>
 
-          {/* Right: Timeline Calendar Grid Side */}
-          <div style={{ 
-            flexGrow: 1, 
-            display: 'flex', 
-            flexDirection: 'column', 
-            minWidth: '900px', // forces horizontal scroll on small screens
-            position: 'relative'
-          }}>
-            
-            {/* June 2026 Days Header */}
-            <div style={{ 
-              height: '48px', 
-              display: 'flex', 
-              borderBottom: '1px solid var(--border-color)',
-              backgroundColor: 'var(--bg-card)'
-            }}>
-              {daysArray.map(day => {
-                const isWeekend = [6, 7, 13, 14, 20, 21, 27, 28].includes(day); // June weekends
-                return (
-                  <div 
-                    key={day}
-                    style={{
-                      flex: 1,
-                      borderRight: '1px solid var(--border-light)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '0.7rem',
-                      fontWeight: day === 11 ? 800 : 500, // Today is June 11th
-                      color: day === 11 ? 'var(--primary)' : isWeekend ? 'var(--text-muted)' : 'var(--text-secondary)',
-                      backgroundColor: day === 11 ? 'var(--primary-alpha)' : isWeekend ? 'var(--bg-app)' : 'transparent',
-                      minWidth: '30px'
-                    }}
-                  >
-                    <span>{day}</span>
-                    <span style={{ fontSize: '0.55rem', textTransform: 'uppercase' }}>
-                      {['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][new Date(2026, 5, day).getDay()]}
-                    </span>
-                  </div>
-                );
-              })}
+          {/* Grid Rows mapping */}
+          {filteredTasks.length === 0 ? (
+            <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              Keine Aufgaben gefunden.
             </div>
-
-            {/* Timeline Rows with plotted task bars */}
-            {filteredTasks.map(task => {
+          ) : (
+            filteredTasks.map((task) => {
               const startDay = parseDayString(task.startDate);
               const endDay = parseDayString(task.dueDate, true);
+              const isCompleted = task.status === 'completed';
+              const isOverdue = task.status !== 'completed' && task.dueDate && task.dueDate < '2026-06-11';
 
-              // Grid positioning percentages
-              const leftOffset = ((startDay - 1) / totalDays) * 100;
-              const barWidth = ((endDay - startDay + 1) / totalDays) * 100;
+              const safeAssignees = task.assignees || [];
+              const assignees = users.filter(u => safeAssignees.includes(u.id));
+
+              const safeChecklist = task.checklist || [];
+              const totalCheck = safeChecklist.length;
+              const completedCheck = safeChecklist.filter(c => c.completed).length;
+              const checkPercent = totalCheck > 0 ? Math.round((completedCheck / totalCheck) * 100) : 0;
+
+              // Priority style settings
+              let priorityBg = 'var(--chip)';
+              let priorityColor = 'var(--ink-3)';
+              if (task.priority === 'urgent') {
+                priorityBg = 'var(--red-tint)';
+                priorityColor = 'var(--red)';
+              } else if (task.priority === 'high') {
+                priorityBg = 'var(--amber-tint)';
+                priorityColor = 'var(--amber-deep)';
+              } else if (task.priority === 'medium') {
+                priorityBg = 'var(--primary-tint)';
+                priorityColor = 'var(--primary)';
+              }
+
+              // Status timeline colors
+              let barBg = 'var(--gold)';
+              if (isCompleted) {
+                barBg = 'var(--green)';
+              } else if (task.status === 'in_progress') {
+                barBg = 'var(--primary)';
+              }
 
               return (
                 <div 
                   key={task.id}
-                  style={{
-                    height: '60px',
-                    borderBottom: '1px solid var(--border-light)',
-                    position: 'relative',
-                    display: 'flex',
-                    alignItems: 'center'
+                  style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: '250px 1fr', 
+                    alignItems: 'center', 
+                    padding: '13px 0', 
+                    borderBottom: '1px solid var(--border-soft)',
+                    cursor: 'pointer' 
                   }}
+                  onClick={() => onSelectTask(task)}
+                  className="hover-timeline-row"
                 >
-                  {/* Grid background lines */}
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', pointerEvents: 'none' }}>
-                    {daysArray.map(day => (
-                      <div 
-                        key={day} 
-                        style={{ 
-                          flex: 1, 
-                          borderRight: '1px solid var(--border-light)', 
-                          height: '100%',
-                          minWidth: '30px',
-                          backgroundColor: day === 11 ? 'rgba(14, 165, 233, 0.02)' : 'transparent' 
-                        }} 
-                      />
-                    ))}
+                  {/* Left Column: Task information */}
+                  <div style={{ minWidth: 0, paddingRight: '18px' }}>
+                    <div style={{ 
+                      fontSize: '13px', 
+                      fontWeight: 600, 
+                      color: isCompleted ? 'var(--ink-2)' : 'var(--ink)', 
+                      textDecoration: isCompleted ? 'line-through' : 'none',
+                      whiteSpace: 'nowrap', 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis' 
+                    }}>
+                      {task.title}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginTop: '5px' }}>
+                      <span style={{ fontSize: '9.5px', fontWeight: 700, letterSpacing: '.05em', color: priorityColor, background: priorityBg, padding: '2px 7px', borderRadius: '6px' }}>
+                        {getPriorityText(task.priority)}
+                      </span>
+                      
+                      {/* Assignees circles stack */}
+                      <div style={{ display: 'flex' }}>
+                        {assignees.map((user, uIdx) => (
+                          <div 
+                            key={user.id}
+                            style={{
+                              width: '20px',
+                              height: '20px',
+                              borderRadius: '50%',
+                              backgroundColor: user.color,
+                              color: 'white',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '8.5px',
+                              fontWeight: 700,
+                              border: '1.5px solid var(--bg-card)',
+                              marginLeft: uIdx > 0 ? '-6px' : '0',
+                              zIndex: 5 - uIdx
+                            }}
+                            title={user.name}
+                          >
+                            {user.avatarInitials}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Task bar */}
-                  <div 
-                    onClick={() => onSelectTask(task)}
-                    className="gantt-task-bar"
-                    style={{
-                      position: 'absolute',
-                      left: `${leftOffset}%`,
-                      width: `${barWidth}%`,
-                      height: '32px',
-                      backgroundColor: getPriorityColor(task.priority),
-                      borderRadius: 'var(--radius-sm)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '0 10px',
-                      color: 'white',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      boxShadow: 'var(--shadow-sm)',
-                      zIndex: 2,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      transition: 'transform var(--transition-fast), filter var(--transition-fast)'
-                    }}
-                    title={`${task.title} (${task.startDate} bis ${task.dueDate})`}
-                  >
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {task.title}
-                    </span>
+                  {/* Right Column: 30 days grid timeline bar */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(30, 1fr)', height: '30px', alignItems: 'center' }}>
+                    <div 
+                      style={{ 
+                        gridColumn: `${startDay} / ${endDay + 1}`, 
+                        height: '18px', 
+                        borderRadius: '999px', 
+                        background: barBg,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: isCompleted ? 'flex-end' : 'flex-start',
+                        paddingRight: isCompleted ? '7px' : '0',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        boxShadow: task.priority === 'urgent' && !isCompleted ? '0 0 0 2px var(--red-tint)' : 'none',
+                        transition: 'transform var(--transition-fast), filter var(--transition-fast)'
+                      }}
+                      className="gantt-task-bar"
+                      title={`${task.title} (${task.startDate} bis ${task.dueDate})`}
+                    >
+                      {/* Completed checkmark inside the bar */}
+                      {isCompleted && (
+                        <Check size={11} stroke="#fff" strokeWidth={3} />
+                      )}
+
+                      {/* In Bearbeitung progress fill overlay */}
+                      {task.status === 'in_progress' && totalCheck > 0 && (
+                        <div 
+                          style={{ 
+                            position: 'absolute', 
+                            inset: 0, 
+                            width: `${checkPercent}%`, 
+                            background: 'rgba(255, 255, 255, 0.28)' 
+                          }} 
+                        />
+                      )}
+                    </div>
                   </div>
+
                 </div>
               );
-            })}
-
-            {filteredTasks.length === 0 && (
-              <div style={{ height: '60px', borderBottom: '1px solid var(--border-light)' }} />
-            )}
-          </div>
+            })
+          )}
         </div>
 
-      </div>
-
-      {/* Helper Legend */}
-      <div className="card" style={{ padding: '12px 16px', display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
-        <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>Farbcode Prioritäten:</span>
-        <div style={{ display: 'flex', gap: '14px', fontSize: '0.75rem', fontWeight: 600 }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: 'var(--danger)' }} /> Hoch / Dringend
-          </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: 'var(--warning)' }} /> Mittel
-          </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: 'var(--info)' }} /> Niedrig
-          </span>
-        </div>
-        
-        <div style={{ marginLeft: 'auto', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-          * Heute markiert als hervorgehobene Spalte (11. Juni 2026)
+        {/* Legend / Info Footer */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '14px', paddingTop: '14px', borderTop: '1px solid var(--border-soft)', fontSize: '12px', color: 'var(--muted)' }}>
+          <span style={{ width: '14px', height: '2px', background: 'var(--primary)', opacity: 0.65, borderRadius: '2px' }}></span>
+          Heute-Marker (11. Juni 2026, simulierte Systemzeit) · helle Füllung = erledigter Anteil der Unteraufgaben · graue Spalten = Wochenende
         </div>
       </div>
+
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Key, Mail, AlertCircle } from 'lucide-react';
+import { Key, Mail, AlertCircle } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
 export const LoginView: React.FC = () => {
@@ -28,40 +28,44 @@ export const LoginView: React.FC = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'radial-gradient(circle at top right, var(--primary-light), var(--bg-primary))',
-      padding: '20px'
+      padding: '24px',
+      backgroundColor: 'var(--bg-app)',
+      backgroundImage: 'radial-gradient(900px 600px at 85% -5%, var(--primary-tint) 0%, transparent 65%)',
+      color: 'var(--ink)'
     }}>
-      <div className="card" style={{
-        maxWidth: '440px',
+      <div style={{
         width: '100%',
+        maxWidth: '440px',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
+        borderRadius: '22px',
         padding: '40px',
-        boxShadow: 'var(--shadow-lg)',
-        border: '1px solid var(--border-color)',
-        backdropFilter: 'blur(10px)',
-        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+        boxShadow: 'var(--shadow-pop)',
         animation: 'fadeIn 0.5s ease-out'
       }}>
         {/* Brand Header */}
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '56px',
-            height: '56px',
-            borderRadius: '16px',
-            backgroundColor: 'var(--primary)',
-            color: 'white',
-            marginBottom: '16px',
-            boxShadow: '0 8px 16px rgba(14, 165, 233, 0.3)'
-          }}>
-            <Shield size={28} />
-          </div>
-          <h2 style={{ margin: 0, fontSize: '1.8rem', fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, color: 'var(--text-primary)' }}>
-            KoWoPlanner
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '30px' }}>
+          <img 
+            src="/kitten_logo.png" 
+            alt="PISHI Kitten Logo" 
+            style={{ 
+              width: '64px', 
+              height: '64px', 
+              borderRadius: '18px', 
+              objectFit: 'cover',
+              boxShadow: '0 8px 18px rgba(10, 143, 214, 0.35)',
+              border: '1px solid var(--border)',
+              marginBottom: '16px'
+            }} 
+          />
+          <h2 
+            style={{ fontFamily: 'Space Grotesk', fontSize: '26px', fontWeight: 600, letterSpacing: '-.02em', color: 'var(--ink)', margin: 0 }}
+            title="PISHI-Project-and-Incident-Scheduling-Helper-for-IT-Departments Public"
+          >
+            PISHI
           </h2>
-          <p style={{ margin: '8px 0 0 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-            IT-Projektplaner & Helpdesk • KOWOBAU
+          <p style={{ fontSize: '12.5px', color: 'var(--muted)', marginTop: '6px', fontWeight: 500 }}>
+            IT-Projektplaner &amp; Helpdesk · KOWOBAU
           </p>
         </div>
 
@@ -71,13 +75,13 @@ export const LoginView: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            backgroundColor: 'rgba(239, 68, 68, 0.15)',
-            border: '1px solid var(--danger)',
+            backgroundColor: 'var(--red-tint)',
+            border: '1px solid var(--red-border)',
             padding: '12px 16px',
-            borderRadius: 'var(--radius-md)',
+            borderRadius: '11px',
             marginBottom: '20px',
-            color: 'var(--danger)',
-            fontSize: '0.85rem'
+            color: 'var(--red)',
+            fontSize: '13px'
           }}>
             <AlertCircle size={16} style={{ flexShrink: 0 }} />
             <span>{error}</span>
@@ -85,84 +89,155 @@ export const LoginView: React.FC = () => {
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Mail size={12} />
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '6px' }}>
+              <Mail size={12} strokeWidth={2} />
               <span>E-Mail-Adresse</span>
             </label>
             <input
               type="email"
-              className="form-control"
-              placeholder="z.B. frank.kroener@kowobau.de"
+              placeholder="z. B. frank.kroener@kowobau.de"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={loading}
+              style={{
+                width: '100%',
+                background: 'var(--bg-subtle)',
+                border: '1px solid var(--border-input)',
+                borderRadius: '11px',
+                padding: '12px 14px',
+                fontFamily: 'inherit',
+                fontSize: '13.5px',
+                color: 'var(--ink)',
+                outline: 'none',
+                transition: 'border-color var(--transition-fast)'
+              }}
             />
           </div>
 
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Key size={12} />
+          <div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '6px' }}>
+              <Key size={12} strokeWidth={2} />
               <span>Passwort</span>
             </label>
             <input
               type="password"
-              className="form-control"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={loading}
+              style={{
+                width: '100%',
+                background: 'var(--bg-subtle)',
+                border: '1px solid var(--border-input)',
+                borderRadius: '11px',
+                padding: '12px 14px',
+                fontFamily: 'inherit',
+                fontSize: '13.5px',
+                color: 'var(--ink)',
+                outline: 'none',
+                transition: 'border-color var(--transition-fast)'
+              }}
             />
           </div>
 
           <button
             type="submit"
-            className="btn btn-primary"
+            disabled={loading}
             style={{
-              width: '100%',
-              padding: '12px',
-              fontSize: '0.95rem',
-              fontWeight: 600,
-              marginTop: '8px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '8px'
+              gap: '8px',
+              background: 'var(--primary-btn)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '12px',
+              padding: '13px',
+              fontSize: '14px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: 'var(--btn-shadow)',
+              marginTop: '4px',
+              width: '100%',
+              transition: 'background var(--transition-fast)'
             }}
-            disabled={loading}
+            className="hover-btn-primary"
           >
             {loading ? 'Anmelden...' : 'Anmelden'}
           </button>
         </form>
 
-        {/* Quick Demo Logins */}
-        <div style={{ marginTop: '32px', borderTop: '1px solid var(--border-light)', paddingTop: '24px' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.05em', display: 'block', marginBottom: '12px' }}>
+        {/* Quick Demo Logins from Mockup */}
+        <div style={{ marginTop: '30px', borderTop: '1px solid var(--border-soft)', paddingTop: '22px' }}>
+          <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', display: 'block', marginBottom: '12px' }}>
             Schnellanmeldung (Demo)
           </span>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <button
+              type="button"
               onClick={() => handleQuickLogin('frank.kroener@kowobau.de')}
-              className="btn btn-secondary"
-              style={{ padding: '8px 12px', fontSize: '0.75rem', justifyContent: 'flex-start', textAlign: 'left', width: '100%' }}
-              disabled={loading}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                background: 'var(--bg-subtle)',
+                border: '1px solid var(--border-input)',
+                borderRadius: '12px',
+                padding: '10px 14px',
+                cursor: 'pointer',
+                width: '100%',
+                textAlign: 'left',
+                fontFamily: 'inherit',
+                transition: 'border-color var(--transition-fast), background var(--transition-fast)'
+              }}
+              className="quick-login-btn"
             >
-              💼 Frank Kröner (IT-Leiter)
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#0ea5e9', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, flex: 'none' }}>FK</div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink)' }}>Frank Kröner</div>
+                <div style={{ fontSize: '11px', color: 'var(--muted)' }}>IT-Leiter KOWOBAU · Admin</div>
+              </div>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9,6 15,12 9,18"/></svg>
             </button>
+
             <button
+              type="button"
               onClick={() => handleQuickLogin('sabine.schmidt@kowobau.de')}
-              className="btn btn-secondary"
-              style={{ padding: '8px 12px', fontSize: '0.75rem', justifyContent: 'flex-start', textAlign: 'left', width: '100%' }}
-              disabled={loading}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                background: 'var(--bg-subtle)',
+                border: '1px solid var(--border-input)',
+                borderRadius: '12px',
+                padding: '10px 14px',
+                cursor: 'pointer',
+                width: '100%',
+                textAlign: 'left',
+                fontFamily: 'inherit',
+                transition: 'border-color var(--transition-fast), background var(--transition-fast)'
+              }}
+              className="quick-login-btn"
             >
-              🛠️ Sabine Schmidt (SysAdmin)
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#8b5cf6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, flex: 'none' }}>SS</div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink)' }}>Sabine Schmidt</div>
+                <div style={{ fontSize: '11px', color: 'var(--muted)' }}>Systemadministratorin</div>
+              </div>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9,6 15,12 9,18"/></svg>
             </button>
           </div>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '11px', color: 'var(--faint)', fontWeight: 500 }}>
+          Version 1.0.0 (Beta) · Simulierte Systemzeit: 11. Juni 2026
         </div>
       </div>
     </div>
   );
 };
+
