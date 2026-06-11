@@ -4,12 +4,16 @@ import type { User } from '../data/mockData';
 
 interface AdminViewProps {
   users: User[];
-  onSaveUser: (user: User) => void;
+  currentUserId: string;
+  onSaveUser: (user: User, password?: string) => void;
   onDeleteUser: (userId: string) => void;
 }
 
+const MIN_PASSWORD_LENGTH = 8;
+
 export const AdminView: React.FC<AdminViewProps> = ({
   users,
+  currentUserId,
   onSaveUser,
   onDeleteUser
 }) => {
@@ -22,8 +26,9 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [role, setRole] = useState('Techniker');
   const [color, setColor] = useState('#0ea5e9');
   const [initials, setInitials] = useState('');
-  const [password, setPassword] = useState('••••••••');
-  
+  const [password, setPassword] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+
   const [showPassword, setShowPassword] = useState(false);
 
   // Color options
@@ -52,7 +57,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     }
   };
 
-  // Start editing a user
+  // Start editing a user (password stays empty = unchanged)
   const handleEditClick = (user: User) => {
     setEditingUser(user);
     setName(user.name);
@@ -60,7 +65,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setRole(user.role);
     setColor(user.color);
     setInitials(user.avatarInitials);
-    setPassword('wertZ765!'); // Simulated loaded password
+    setIsAdmin(Boolean(user.isAdmin));
+    setPassword('');
   };
 
   // Cancel edit/reset form
@@ -71,7 +77,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
     setRole('Techniker');
     setColor('#0ea5e9');
     setInitials('');
-    setPassword('••••••••');
+    setIsAdmin(false);
+    setPassword('');
   };
 
   // Save / Add user
@@ -82,22 +89,32 @@ export const AdminView: React.FC<AdminViewProps> = ({
       return;
     }
 
+    if (!editingUser && password.length < MIN_PASSWORD_LENGTH) {
+      alert(`Bitte vergeben Sie ein Initialpasswort mit mindestens ${MIN_PASSWORD_LENGTH} Zeichen.`);
+      return;
+    }
+    if (editingUser && password && password.length < MIN_PASSWORD_LENGTH) {
+      alert(`Das neue Passwort muss mindestens ${MIN_PASSWORD_LENGTH} Zeichen lang sein.`);
+      return;
+    }
+
     const savedUser: User = {
       id: editingUser ? editingUser.id : `user-${Date.now()}`,
       name: name.trim(),
       email: email.trim(),
       role,
       color,
+      isAdmin,
       avatarInitials: initials.trim().substring(0, 2).toUpperCase()
     };
 
-    onSaveUser(savedUser);
+    onSaveUser(savedUser, password || undefined);
     handleCancel();
   };
 
   const handleDeleteClick = (userId: string, userName: string) => {
-    if (userId === 'user-1') {
-      alert('Der aktive Administrator-Account (Frank Kröner) kann nicht gelöscht werden.');
+    if (userId === currentUserId) {
+      alert('Sie können Ihren eigenen Account nicht löschen.');
       return;
     }
     if (confirm(`Möchten Sie den Account von "${userName}" wirklich löschen? Der Benutzer wird auch aus allen Aufgabenzuweisungen entfernt.`)) {
@@ -168,12 +185,12 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       >
                         <Edit2 size={14} />
                       </button>
-                      <button 
-                        className="theme-toggle-btn" 
+                      <button
+                        className="theme-toggle-btn"
                         style={{ padding: '6px', borderRadius: '6px', color: 'var(--danger)' }}
                         onClick={() => handleDeleteClick(user.id, user.name)}
-                        disabled={user.id === 'user-1'}
-                        title={user.id === 'user-1' ? 'Admin-Account' : 'Löschen'}
+                        disabled={user.id === currentUserId}
+                        title={user.id === currentUserId ? 'Eigener Account' : 'Löschen'}
                       >
                         <Trash2 size={14} />
                       </button>
@@ -251,19 +268,21 @@ export const AdminView: React.FC<AdminViewProps> = ({
               </div>
             </div>
 
-            {/* Password (simulated security) */}
+            {/* Password */}
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Key size={12} />
-                <span>Passwort festlegen</span>
+                <span>{editingUser ? 'Neues Passwort (leer lassen = unverändert)' : 'Initialpasswort festlegen'}</span>
               </label>
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                <input 
-                  type={showPassword ? 'text' : 'password'} 
-                  className="form-control" 
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  className="form-control"
                   style={{ width: '100%', paddingRight: '40px' }}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  placeholder={editingUser ? 'Unverändert' : `Mind. ${MIN_PASSWORD_LENGTH} Zeichen`}
+                  autoComplete="new-password"
                 />
                 <button 
                   type="button"
@@ -273,6 +292,19 @@ export const AdminView: React.FC<AdminViewProps> = ({
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+            </div>
+
+            {/* Admin rights */}
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', cursor: editingUser?.id === currentUserId ? 'not-allowed' : 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={isAdmin}
+                  onChange={(e) => setIsAdmin(e.target.checked)}
+                  disabled={editingUser?.id === currentUserId}
+                />
+                <span>Administrator-Rechte (Benutzerverwaltung)</span>
+              </label>
             </div>
 
             {/* Color circles selection */}

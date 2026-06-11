@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// '/api' works in production (nginx proxy) and in dev via the vite proxy (see vite.config.ts)
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -23,13 +24,18 @@ api.interceptors.request.use(
   }
 );
 
-// Optional: Global error handler (e.g. redirect to login on 401)
+// Registered by the store to fully log out on 401 (avoids a circular import)
+let onUnauthorized: (() => void) | null = null;
+export const setUnauthorizedHandler = (handler: () => void) => {
+  onUnauthorized = handler;
+};
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('kowoplanner_token');
-      // In a full routing context, you'd trigger a logout or redirect
+      if (onUnauthorized) onUnauthorized();
     }
     return Promise.reject(error);
   }

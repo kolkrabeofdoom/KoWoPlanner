@@ -1,11 +1,11 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
 COPY tsconfig.json ./
 
-RUN npm install
+RUN npm ci
 
 COPY prisma ./prisma
 RUN npx prisma generate
@@ -15,4 +15,4 @@ RUN npm run build
 
 EXPOSE 3001
 
-CMD ["node", "dist/index.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]

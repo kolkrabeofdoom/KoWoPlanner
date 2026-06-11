@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { prisma } from '../db';
 import { authenticateJWT, AuthenticatedRequest } from '../middleware/auth';
+import { PRIORITIES, TICKET_CATEGORIES, isOneOf } from '../validate';
 
 const router = Router();
 
@@ -23,6 +24,12 @@ router.post('/', authenticateJWT, async (req: AuthenticatedRequest, res: Respons
 
   if (!title || !reporter || !description) {
     return res.status(400).json({ error: 'Titel, Melder und Beschreibung sind erforderlich.' });
+  }
+  if (category !== undefined && !isOneOf(category, TICKET_CATEGORIES)) {
+    return res.status(400).json({ error: 'Ungültige Kategorie.' });
+  }
+  if (priority !== undefined && !isOneOf(priority, PRIORITIES)) {
+    return res.status(400).json({ error: 'Ungültige Priorität.' });
   }
 
   try {

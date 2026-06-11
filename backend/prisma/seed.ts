@@ -13,7 +13,8 @@ async function main() {
   await prisma.user.deleteMany({});
 
   console.log('Seeding users...');
-  const passwordHash = bcrypt.hashSync('PASSWORT', 10);
+  // Demo password is configurable; default only intended for local demo setups.
+  const passwordHash = bcrypt.hashSync(process.env.SEED_PASSWORD || 'PASSWORT', 10);
 
   const user1 = await prisma.user.create({
     data: {
@@ -22,6 +23,7 @@ async function main() {
       email: 'frank.kroener@kowobau.de',
       passwordHash,
       role: 'IT-Leiter KOWOBAU',
+      isAdmin: true,
       avatarInitials: 'FK',
       color: '#0ea5e9'
     }

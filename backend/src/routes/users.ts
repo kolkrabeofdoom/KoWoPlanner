@@ -1,22 +1,27 @@
 import { Router, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../db';
-import { authenticateJWT, AuthenticatedRequest } from '../middleware/auth';
+import { authenticateJWT, requireAdmin, AuthenticatedRequest } from '../middleware/auth';
 
 const router = Router();
+
+const PUBLIC_USER_FIELDS = {
+  id: true,
+  name: true,
+  email: true,
+  role: true,
+  avatarInitials: true,
+  color: true,
+  isAdmin: true
+} as const;
+
+const MIN_PASSWORD_LENGTH = 8;
 
 // GET /api/users
 router.get('/', authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        avatarInitials: true,
-        color: true
-      }
+      select: PUBLIC_USER_FIELDS
     });
     res.json(users);
   } catch (error) {
@@ -26,11 +31,15 @@ router.get('/', authenticateJWT, async (req: AuthenticatedRequest, res: Response
 });
 
 // POST /api/users
-router.post('/', authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
-  const { name, email, password, role, avatarInitials, color } = req.body;
+router.post('/', authenticateJWT, requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
+  const { name, email, password, role, avatarInitials, color, isAdmin } = req.body;
 
   if (!name || !email || !password || !role) {
     return res.status(400).json({ error: 'Name, E-Mail, Passwort und Rolle sind erforderlich.' });
+  }
+
+  if (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH) {
+    return res.status(400).json({ error: `Das Passwort muss mindestens ${MIN_PASSWORD_LENGTH} Zeichen lang sein.` });
   }
 
   try {
@@ -39,24 +48,18 @@ router.post('/', authenticateJWT, async (req: AuthenticatedRequest, res: Respons
       return res.status(400).json({ error: 'Ein Benutzer mit dieser E-Mail-Adresse existiert bereits.' });
     }
 
-    const passwordHash = bcrypt.hashSync(password, 10);
+    const passwordHash = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: {
         name,
         email,
         passwordHash,
         role,
+        isAdmin: Boolean(isAdmin),
         avatarInitials: avatarInitials || name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2),
         color: color || '#8b5cf6'
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        avatarInitials: true,
-        color: true
-      }
+      select: PUBLIC_USER_FIELDS
     });
 
     res.status(201).json(user);
@@ -67,9 +70,14 @@ router.post('/', authenticateJWT, async (req: AuthenticatedRequest, res: Respons
 });
 
 // PUT /api/users/:id
-router.put('/:id', authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+router.put('/:id', authenticateJWT, requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
-  const { name, email, password, role, avatarInitials, color } = req.body;
+  const { name, email, password, role, avatarInitials, color, isAdmin } = req.body;
+
+  // Admins cannot revoke their own admin rights (avoids locking everyone out)
+  if (req.user && req.user.id === id && isAdmin === false) {
+    return res.status(400).json({ error: 'Sie können Ihre eigenen Administrator-Rechte nicht entziehen.' });
+  }
 
   try {
     const data: any = {
@@ -77,24 +85,21 @@ router.put('/:id', authenticateJWT, async (req: AuthenticatedRequest, res: Respo
       email,
       role,
       avatarInitials,
-      color
+      color,
+      isAdmin: typeof isAdmin === 'boolean' ? isAdmin : undefined
     };
 
     if (password) {
-      data.passwordHash = bcrypt.hashSync(password, 10);
+      if (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH) {
+        return res.status(400).json({ error: `Das Passwort muss mindestens ${MIN_PASSWORD_LENGTH} Zeichen lang sein.` });
+      }
+      data.passwordHash = await bcrypt.hash(password, 10);
     }
 
     const user = await prisma.user.update({
       where: { id },
       data,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        avatarInitials: true,
-        color: true
-      }
+      select: PUBLIC_USER_FIELDS
     });
 
     res.json(user);
@@ -105,10 +110,9 @@ router.put('/:id', authenticateJWT, async (req: AuthenticatedRequest, res: Respo
 });
 
 // DELETE /api/users/:id
-router.delete('/:id', authenticateJWT, async (req: AuthenticatedRequest, res: Response) => {
+router.delete('/:id', authenticateJWT, requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
 
-  // Protect Active Administrator Frank Kröner against self-deletion in standard prototype mode
   if (req.user && req.user.id === id) {
     return res.status(400).json({ error: 'Sie können sich nicht selbst löschen.' });
   }
