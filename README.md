@@ -115,8 +115,8 @@ Das System basiert auf einem Premium-Designsystem in **Vanilla CSS**:
 - **Build-Tool:** Vite
 - **Router:** React Router (`react-router-dom`)
 - **State:** Zustand
-- **Backend:** Node.js Express API mit TypeScript
-- **Database:** PostgreSQL mit Prisma ORM
+- **Backend:** Rust API (Axum & SQLx)
+- **Database:** PostgreSQL
 - **Icons:** Lucide React
 - **Styling:** Vanilla CSS (CSS Variables)
 
@@ -127,7 +127,7 @@ Das System basiert auf einem Premium-Designsystem in **Vanilla CSS**:
 Folgen Sie diesen Schritten, um die Anwendung lokal auszuführen:
 
 ### 1. Repository klonen & vorbereiten
-Stellen Sie sicher, dass Node.js installiert ist. Navigieren Sie in das Projektverzeichnis:
+Stellen Sie sicher, dass Node.js und Rust installiert sind. Navigieren Sie in das Projektverzeichnis:
 ```bash
 cd KoWoPlanner
 ```
@@ -140,17 +140,19 @@ npm install
 ### 3. Umgebungsvariablen konfigurieren
 Backend und Docker-Setup benötigen Secrets, die **nicht** im Repository liegen:
 ```bash
-# Für das Backend (lokale Entwicklung):
-cp backend/.env.example backend/.env
+# Für das Rust-Backend (lokale Entwicklung):
+cp backend-rust/.env.example backend-rust/.env
 # Für Docker Compose:
 cp .env.example .env
 ```
-Anschließend in den `.env`-Dateien ein starkes `JWT_SECRET` (z.B. via `openssl rand -base64 48`) und das Datenbank-Passwort eintragen. Ohne gesetztes `JWT_SECRET` startet das Backend nicht.
+Anschließend in den `.env`-Dateien ein starkes `JWT_SECRET` und das Datenbank-Passwort eintragen.
 
 ### 4. Entwicklungsserver starten
 ```bash
 # Backend (Port 3001):
-cd backend && npm install && npm run db:migrate && npm run db:seed && npm run dev
+cd backend-rust && cargo run --bin backend-rust
+# Datenbank befüllen:
+cargo run --bin seed
 # Frontend (Port 5173, proxyt /api automatisch an das Backend):
 npm run dev
 ```
@@ -158,7 +160,8 @@ Der Planer läuft standardmäßig auf [http://localhost:5173](http://localhost:5
 
 Alternativ mit Docker Compose (Frontend auf Port 80, Migrationen laufen automatisch):
 ```bash
-docker compose up --build
+docker compose up --build -d
+docker exec kowoplanner-backend /app/seed
 ```
 
 ### 5. Produktions-Build erstellen
