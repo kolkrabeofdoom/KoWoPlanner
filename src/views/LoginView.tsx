@@ -97,7 +97,7 @@ export const LoginView: React.FC = () => {
             </label>
             <input
               type="email"
-              placeholder="z. B. michel.foucault@kowobau.de"
+              placeholder="z. B. michel.foucault@verbietetdieafd.de"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -179,7 +179,7 @@ export const LoginView: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <button
               type="button"
-              onClick={() => handleQuickLogin('michel.foucault@kowobau.de')}
+              onClick={() => handleQuickLogin('michel.foucault@verbietetdieafd.de')}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -206,7 +206,7 @@ export const LoginView: React.FC = () => {
 
             <button
               type="button"
-              onClick={() => handleQuickLogin('jacques.derrida@kowobau.de')}
+              onClick={() => handleQuickLogin('jacques.derrida@verbietetdieafd.de')}
               style={{
                 display: 'flex',
                 alignItems: 'center',

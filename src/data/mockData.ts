@@ -61,7 +61,7 @@ export const mockUsers: User[] = [
     name: 'Michel Foucault',
     avatarInitials: 'MF',
     role: 'IT-Leiter KOWOBAU',
-    email: 'michel.foucault@kowobau.de',
+    email: 'michel.foucault@verbietetdieafd.de',
     color: '#0ea5e9' // primary cyan
   },
   {
@@ -69,7 +69,7 @@ export const mockUsers: User[] = [
     name: 'Jacques Derrida',
     avatarInitials: 'JD',
     role: 'Systemadministratorin',
-    email: 'jacques.derrida@kowobau.de',
+    email: 'jacques.derrida@verbietetdieafd.de',
     color: '#8b5cf6' // purple
   },
   {
@@ -77,7 +77,7 @@ export const mockUsers: User[] = [
     name: 'Gilles Deleuze',
     avatarInitials: 'GD',
     role: 'IT-Support & Hardware',
-    email: 'gilles.deleuze@kowobau.de',
+    email: 'gilles.deleuze@verbietetdieafd.de',
     color: '#10b981' // green
   },
   {
@@ -85,7 +85,7 @@ export const mockUsers: User[] = [
     name: 'Judith Butler',
     avatarInitials: 'JB',
     role: 'Softwareentwicklerin',
-    email: 'judith.butler@kowobau.de',
+    email: 'judith.butler@verbietetdieafd.de',
     color: '#f59e0b' // warning amber
   }
 ];

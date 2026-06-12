@@ -266,7 +266,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
               className="form-control"
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
-              placeholder="z. B. m.mustermann@kowobau.de" 
+              placeholder="z. B. m.mustermann@verbietetdieafd.de" 
               style={{ width: '100%', background: 'var(--bg-subtle)', border: '1px solid var(--border-input)', borderRadius: '10px', padding: '10px 13px', fontSize: '13.5px', color: 'var(--ink)', outline: 'none' }}
               required
             />

@@ -20,7 +20,7 @@ async function main() {
     data: {
       id: 'user-1',
       name: 'Michel Foucault',
-      email: 'michel.foucault@kowobau.de',
+      email: 'michel.foucault@verbietetdieafd.de',
       passwordHash,
       role: 'IT-Leiter KOWOBAU',
       isAdmin: true,
@@ -33,7 +33,7 @@ async function main() {
     data: {
       id: 'user-2',
       name: 'Jacques Derrida',
-      email: 'jacques.derrida@kowobau.de',
+      email: 'jacques.derrida@verbietetdieafd.de',
       passwordHash,
       role: 'Systemadministratorin',
       avatarInitials: 'JD',
@@ -45,7 +45,7 @@ async function main() {
     data: {
       id: 'user-3',
       name: 'Gilles Deleuze',
-      email: 'gilles.deleuze@kowobau.de',
+      email: 'gilles.deleuze@verbietetdieafd.de',
       passwordHash,
       role: 'IT-Support & Hardware',
       avatarInitials: 'GD',
@@ -57,7 +57,7 @@ async function main() {
     data: {
       id: 'user-4',
       name: 'Judith Butler',
-      email: 'judith.butler@kowobau.de',
+      email: 'judith.butler@verbietetdieafd.de',
       passwordHash,
       role: 'Softwareentwicklerin',
       avatarInitials: 'JB',
