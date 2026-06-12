@@ -28,7 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
   // Mock notifications
   const notifications = [
     { id: 1, text: 'Neue Zuweisung: "Wasserschaden Bad Decke"', time: 'Vor 10 Min.' },
-    { id: 2, text: 'Sabine Schmidt hat einen Kommentar hinterlassen', time: 'Vor 1 Std.' },
+    { id: 2, text: 'Jacques Derrida hat einen Kommentar hinterlassen', time: 'Vor 1 Std.' },
     { id: 3, text: 'Fälligkeitsdatum naht für Strang A Prüfung', time: 'Morgen fällig' }
   ];
 

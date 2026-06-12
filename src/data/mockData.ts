@@ -58,34 +58,34 @@ export interface Ticket {
 export const mockUsers: User[] = [
   {
     id: 'user-1',
-    name: 'Frank Kröner',
-    avatarInitials: 'FK',
+    name: 'Michel Foucault',
+    avatarInitials: 'MF',
     role: 'IT-Leiter KOWOBAU',
-    email: 'frank.kroener@kowobau.de',
+    email: 'michel.foucault@kowobau.de',
     color: '#0ea5e9' // primary cyan
   },
   {
     id: 'user-2',
-    name: 'Sabine Schmidt',
-    avatarInitials: 'SS',
+    name: 'Jacques Derrida',
+    avatarInitials: 'JD',
     role: 'Systemadministratorin',
-    email: 'sabine.schmidt@kowobau.de',
+    email: 'jacques.derrida@kowobau.de',
     color: '#8b5cf6' // purple
   },
   {
     id: 'user-3',
-    name: 'Thomas Müller',
-    avatarInitials: 'TM',
+    name: 'Gilles Deleuze',
+    avatarInitials: 'GD',
     role: 'IT-Support & Hardware',
-    email: 'thomas.mueller@kowobau.de',
+    email: 'gilles.deleuze@kowobau.de',
     color: '#10b981' // green
   },
   {
     id: 'user-4',
-    name: 'Anna Meier',
-    avatarInitials: 'AM',
+    name: 'Judith Butler',
+    avatarInitials: 'JB',
     role: 'Softwareentwicklerin',
-    email: 'anna.meier@kowobau.de',
+    email: 'judith.butler@kowobau.de',
     color: '#f59e0b' // warning amber
   }
 ];

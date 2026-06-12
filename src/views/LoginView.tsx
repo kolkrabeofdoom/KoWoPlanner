@@ -97,7 +97,7 @@ export const LoginView: React.FC = () => {
             </label>
             <input
               type="email"
-              placeholder="z. B. frank.kroener@kowobau.de"
+              placeholder="z. B. michel.foucault@kowobau.de"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -179,7 +179,7 @@ export const LoginView: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <button
               type="button"
-              onClick={() => handleQuickLogin('frank.kroener@kowobau.de')}
+              onClick={() => handleQuickLogin('michel.foucault@kowobau.de')}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -196,9 +196,9 @@ export const LoginView: React.FC = () => {
               }}
               className="quick-login-btn"
             >
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#0ea5e9', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, flex: 'none' }}>FK</div>
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#0ea5e9', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, flex: 'none' }}>MF</div>
               <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink)' }}>Frank Kröner</div>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink)' }}>Michel Foucault</div>
                 <div style={{ fontSize: '11px', color: 'var(--muted)' }}>IT-Leiter KOWOBAU · Admin</div>
               </div>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9,6 15,12 9,18"/></svg>
@@ -206,7 +206,7 @@ export const LoginView: React.FC = () => {
 
             <button
               type="button"
-              onClick={() => handleQuickLogin('sabine.schmidt@kowobau.de')}
+              onClick={() => handleQuickLogin('jacques.derrida@kowobau.de')}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -223,9 +223,9 @@ export const LoginView: React.FC = () => {
               }}
               className="quick-login-btn"
             >
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#8b5cf6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, flex: 'none' }}>SS</div>
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#8b5cf6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, flex: 'none' }}>JD</div>
               <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink)' }}>Sabine Schmidt</div>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink)' }}>Jacques Derrida</div>
                 <div style={{ fontSize: '11px', color: 'var(--muted)' }}>Systemadministratorin</div>
               </div>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9,6 15,12 9,18"/></svg>

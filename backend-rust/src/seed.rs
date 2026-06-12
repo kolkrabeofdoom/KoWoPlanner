@@ -24,69 +24,69 @@ async fn main() {
     println!("Seeding users...");
     let password_hash = hash("PASSWORT", DEFAULT_COST).unwrap();
 
-    // Frank Kröner (Admin)
+    // Michel Foucault (Admin)
     sqlx::query(
         r#"INSERT INTO "User" (id, name, email, "passwordHash", role, "isAdmin", "avatarInitials", color)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"#
     )
     .bind("user-1")
-    .bind("Frank Kröner")
-    .bind("frank.kroener@kowobau.de")
+    .bind("Michel Foucault")
+    .bind("michel.foucault@kowobau.de")
     .bind(&password_hash)
     .bind("IT-Leiter KOWOBAU")
     .bind(true)
-    .bind("FK")
+    .bind("MF")
     .bind("#0ea5e9")
     .execute(&pool)
     .await
     .unwrap();
 
-    // Sabine Schmidt
+    // Jacques Derrida
     sqlx::query(
         r#"INSERT INTO "User" (id, name, email, "passwordHash", role, "isAdmin", "avatarInitials", color)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"#
     )
     .bind("user-2")
-    .bind("Sabine Schmidt")
-    .bind("sabine.schmidt@kowobau.de")
+    .bind("Jacques Derrida")
+    .bind("jacques.derrida@kowobau.de")
     .bind(&password_hash)
     .bind("Systemadministratorin")
     .bind(false)
-    .bind("SS")
+    .bind("JD")
     .bind("#8b5cf6")
     .execute(&pool)
     .await
     .unwrap();
 
-    // Thomas Müller
+    // Gilles Deleuze
     sqlx::query(
         r#"INSERT INTO "User" (id, name, email, "passwordHash", role, "isAdmin", "avatarInitials", color)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"#
     )
     .bind("user-3")
-    .bind("Thomas Müller")
-    .bind("thomas.mueller@kowobau.de")
+    .bind("Gilles Deleuze")
+    .bind("gilles.deleuze@kowobau.de")
     .bind(&password_hash)
     .bind("IT-Support & Hardware")
     .bind(false)
-    .bind("TM")
+    .bind("GD")
     .bind("#10b981")
     .execute(&pool)
     .await
     .unwrap();
 
-    // Anna Meier
+    // Judith Butler
     sqlx::query(
         r#"INSERT INTO "User" (id, name, email, "passwordHash", role, "isAdmin", "avatarInitials", color)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"#
     )
     .bind("user-4")
-    .bind("Anna Meier")
-    .bind("anna.meier@kowobau.de")
+    .bind("Judith Butler")
+    .bind("judith.butler@kowobau.de")
     .bind(&password_hash)
     .bind("Softwareentwicklerin")
     .bind(false)
-    .bind("AM")
+    .bind("JB")
     .bind("#f59e0b")
     .execute(&pool)
     .await

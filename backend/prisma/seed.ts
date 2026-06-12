@@ -19,12 +19,12 @@ async function main() {
   const user1 = await prisma.user.create({
     data: {
       id: 'user-1',
-      name: 'Frank Kröner',
-      email: 'frank.kroener@kowobau.de',
+      name: 'Michel Foucault',
+      email: 'michel.foucault@kowobau.de',
       passwordHash,
       role: 'IT-Leiter KOWOBAU',
       isAdmin: true,
-      avatarInitials: 'FK',
+      avatarInitials: 'MF',
       color: '#0ea5e9'
     }
   });
@@ -32,11 +32,11 @@ async function main() {
   const user2 = await prisma.user.create({
     data: {
       id: 'user-2',
-      name: 'Sabine Schmidt',
-      email: 'sabine.schmidt@kowobau.de',
+      name: 'Jacques Derrida',
+      email: 'jacques.derrida@kowobau.de',
       passwordHash,
       role: 'Systemadministratorin',
-      avatarInitials: 'SS',
+      avatarInitials: 'JD',
       color: '#8b5cf6'
     }
   });
@@ -44,11 +44,11 @@ async function main() {
   const user3 = await prisma.user.create({
     data: {
       id: 'user-3',
-      name: 'Thomas Müller',
-      email: 'thomas.mueller@kowobau.de',
+      name: 'Gilles Deleuze',
+      email: 'gilles.deleuze@kowobau.de',
       passwordHash,
       role: 'IT-Support & Hardware',
-      avatarInitials: 'TM',
+      avatarInitials: 'GD',
       color: '#10b981'
     }
   });
@@ -56,11 +56,11 @@ async function main() {
   const user4 = await prisma.user.create({
     data: {
       id: 'user-4',
-      name: 'Anna Meier',
-      email: 'anna.meier@kowobau.de',
+      name: 'Judith Butler',
+      email: 'judith.butler@kowobau.de',
       passwordHash,
       role: 'Softwareentwicklerin',
-      avatarInitials: 'AM',
+      avatarInitials: 'JB',
       color: '#f59e0b'
     }
   });
